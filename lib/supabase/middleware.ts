@@ -37,8 +37,26 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (request.nextUrl.pathname.startsWith('/app') && !user) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  if (request.nextUrl.pathname.startsWith('/app')) {
+    if (!user) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('org_id')
+      .eq('user_id', user.id)
+      .single()
+
+    const isOnboarding = request.nextUrl.pathname === '/app/onboarding'
+
+    if (!profile?.org_id && !isOnboarding) {
+      return NextResponse.redirect(new URL('/app/onboarding', request.url))
+    }
+
+    if (profile?.org_id && isOnboarding) {
+      return NextResponse.redirect(new URL('/app', request.url))
+    }
   }
 
   return response
