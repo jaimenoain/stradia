@@ -18,6 +18,25 @@ export default function Home() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader>
+            <CardTitle>Authentication</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+             <div className="flex items-center gap-2">
+              <Button asChild>
+                <a href="/login">Login</a>
+              </Button>
+              <Button variant="outline" asChild>
+                <a href="/signup">Sign Up</a>
+              </Button>
+               <Button variant="secondary" asChild>
+                <a href="/app">Go to App (Protected)</a>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle>Core Components</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
