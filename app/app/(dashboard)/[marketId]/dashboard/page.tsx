@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { signout } from '@/app/login/actions'
-import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/dashboard/empty-state'
 
 export default async function DashboardPage({
   params,
@@ -16,33 +15,48 @@ export default async function DashboardPage({
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return redirect('/login')
+    redirect('/login')
   }
 
-  // Fetch market details to display name
-  const { data: market } = await supabase
+  // Fetch market details to verify existence
+  const { data: market, error } = await supabase
     .from('markets')
-    .select('*')
+    .select('id, name')
     .eq('id', marketId)
     .single()
 
-  return (
-    <div className="flex flex-col h-full w-full items-center justify-center p-4">
-      <div className="text-center space-y-4">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        {market ? (
-          <h2 className="text-xl">Market: {market.name}</h2>
-        ) : (
-           <h2 className="text-xl text-destructive">Market not found</h2>
-        )}
-        <p className="text-muted-foreground text-sm">Market ID: {marketId}</p>
-        <p>Welcome, {user.email}!</p>
-        <form action={signout}>
-            <Button variant="destructive">
-              Sign out
-            </Button>
-        </form>
+  if (error || !market) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-destructive">Market not found or access denied.</p>
       </div>
+    )
+  }
+
+  // Logic: check for active strategies/tasks. For now, always empty.
+  const activeStrategies: any[] = []
+
+  return (
+    <div className="flex flex-col h-full w-full p-8 space-y-8">
+      <div className="flex items-center justify-between space-y-2">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
+          <p className="text-muted-foreground">
+            Overview for {market.name}
+          </p>
+        </div>
+      </div>
+
+      {activeStrategies.length === 0 ? (
+        <div className="flex flex-1 items-center justify-center rounded-lg">
+            <EmptyState marketId={marketId} />
+        </div>
+      ) : (
+        <div>
+            {/* Future dashboard content */}
+            <p>Active Strategies: {activeStrategies.length}</p>
+        </div>
+      )}
     </div>
   )
 }
