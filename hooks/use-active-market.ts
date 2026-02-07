@@ -2,16 +2,15 @@
 
 import { useParams } from 'next/navigation'
 import { useMarkets } from './use-markets'
+import { resolveActiveMarket } from '@/lib/utils'
 
 export function useActiveMarket() {
   const params = useParams()
-
   const rawMarketId = params?.marketId
-  const marketId = Array.isArray(rawMarketId) ? rawMarketId[0] : rawMarketId
 
   const { data: markets, isLoading, error } = useMarkets()
 
-  const activeMarket = markets?.find((m) => m.id === marketId)
+  const { marketId, activeMarket } = resolveActiveMarket(markets, rawMarketId)
 
   return {
     marketId,
