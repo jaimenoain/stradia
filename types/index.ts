@@ -5,3 +5,35 @@ export interface Market {
   region_code: string | null
   currency: string | null
 }
+
+export interface Template {
+  id: string
+  owner_org_id: string | null
+  name: string
+  description: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface TemplateVersion {
+  id: string
+  template_id: string
+  version_string: string
+  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED'
+  changelog: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface TemplateTask {
+  id: string
+  template_version_id: string
+  title: string
+  description: string | null
+  task_type: 'A' | 'B' | 'C'
+  weight: number
+  is_optional: boolean
+  task_config: Record<string, any>
+  created_at: string
+  updated_at: string
+}
