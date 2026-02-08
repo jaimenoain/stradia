@@ -37,3 +37,16 @@ export interface TemplateTask {
   created_at: string
   updated_at: string
 }
+
+export interface MarketBoardTask {
+  id: string
+  status: 'TODO' | 'IN_PROGRESS' | 'DONE' | 'ARCHIVED' | 'GHOST' | string
+  is_ghost: boolean
+  title: string
+  description: string | null
+  task_type: 'A' | 'B' | 'C'
+  origin_template_task_id: string
+  weight: number
+  is_optional: boolean
+  task_config: Record<string, any>
+}
