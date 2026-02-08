@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { publishTemplateVersion, createTemplateVersion } from './actions'
+import { TaskList } from './_components/task-list'
 
 export default function TemplatePage() {
   const params = useParams()
@@ -44,9 +45,10 @@ export default function TemplatePage() {
     try {
       await publishTemplateVersion(latestVersion.id)
       await queryClient.invalidateQueries({ queryKey: ['template', templateId] })
-    } catch (err: any) {
+    } catch (err) {
       console.error(err)
-      alert(err.message || 'Failed to publish version')
+      const message = err instanceof Error ? err.message : 'Failed to publish version'
+      alert(message)
     } finally {
       setIsActionLoading(false)
     }
@@ -57,9 +59,10 @@ export default function TemplatePage() {
     try {
       await createTemplateVersion(templateId)
       await queryClient.invalidateQueries({ queryKey: ['template', templateId] })
-    } catch (err: any) {
+    } catch (err) {
       console.error(err)
-      alert(err.message || 'Failed to create draft')
+      const message = err instanceof Error ? err.message : 'Failed to create draft'
+      alert(message)
     } finally {
       setIsActionLoading(false)
     }
@@ -96,17 +99,21 @@ export default function TemplatePage() {
                <CardTitle>Template Editor</CardTitle>
              </CardHeader>
              <CardContent>
-               <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-lg bg-muted/50">
-                 <FileText className="h-10 w-10 text-muted-foreground mb-4" />
-                 <h3 className="font-semibold text-lg">
-                   {isPublished ? 'Read-Only Mode' : 'Editor Ready'}
-                 </h3>
-                 <p className="text-sm text-muted-foreground max-w-sm mt-2">
-                   {isPublished
-                     ? 'This version is published and cannot be edited. Create a new draft to make changes.'
-                     : 'This is the shell for the template editor. Task management UI will be implemented here.'}
-                 </p>
-               </div>
+               {latestVersion ? (
+                 <TaskList
+                   templateId={templateId}
+                   versionId={latestVersion.id}
+                   isReadOnly={!isDraft}
+                 />
+               ) : (
+                 <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-lg bg-muted/50">
+                   <FileText className="h-10 w-10 text-muted-foreground mb-4" />
+                   <h3 className="font-semibold text-lg">No Draft Available</h3>
+                   <p className="text-sm text-muted-foreground max-w-sm mt-2">
+                     Create a new draft to start editing.
+                   </p>
+                 </div>
+               )}
              </CardContent>
            </Card>
         </div>

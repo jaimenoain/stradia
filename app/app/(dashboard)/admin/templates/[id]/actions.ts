@@ -2,8 +2,10 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { SupabaseClient } from '@supabase/supabase-js'
+import { TemplateTask } from '@/types'
 
-async function incrementVersion(templateId: string, supabase: any) {
+async function incrementVersion(templateId: string, supabase: SupabaseClient) {
   const { data: versions } = await supabase
     .from('template_versions')
     .select('version_string')
@@ -137,4 +139,133 @@ export async function createTemplateVersion(templateId: string) {
 
   revalidatePath('/app/admin/templates/[id]')
   return newVersion
+}
+
+export async function getTasks(versionId: string) {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('template_tasks')
+    .select('*')
+    .eq('template_version_id', versionId)
+    .order('weight', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching tasks:', error)
+    throw new Error(error.message)
+  }
+
+  return data
+}
+
+export async function createTask(versionId: string, task: Partial<TemplateTask>) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('Not authenticated')
+  }
+
+  // Get max weight
+  const { data: maxWeightTask } = await supabase
+    .from('template_tasks')
+    .select('weight')
+    .eq('template_version_id', versionId)
+    .order('weight', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  const nextWeight = (maxWeightTask?.weight || 0) + 1
+
+  const { data, error } = await supabase
+    .from('template_tasks')
+    .insert({
+      ...task,
+      template_version_id: versionId,
+      weight: nextWeight,
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error creating task:', error)
+    throw new Error(error.message)
+  }
+
+  revalidatePath('/app/admin/templates/[id]')
+  return data
+}
+
+export async function updateTask(taskId: string, updates: Partial<TemplateTask>) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('Not authenticated')
+  }
+
+  const { data, error } = await supabase
+    .from('template_tasks')
+    .update(updates)
+    .eq('id', taskId)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error updating task:', error)
+    throw new Error(error.message)
+  }
+
+  revalidatePath('/app/admin/templates/[id]')
+  return data
+}
+
+export async function deleteTask(taskId: string) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('Not authenticated')
+  }
+
+  const { error } = await supabase.from('template_tasks').delete().eq('id', taskId)
+
+  if (error) {
+    console.error('Error deleting task:', error)
+    throw new Error(error.message)
+  }
+
+  revalidatePath('/app/admin/templates/[id]')
+}
+
+export async function reorderTasks(versionId: string, orderedTaskIds: string[]) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('Not authenticated')
+  }
+
+  // Update weights
+  // Note: This is not atomic, but acceptable for this use case.
+  // We loop and update each task's weight.
+  const updates = orderedTaskIds.map((id, index) =>
+    supabase.from('template_tasks').update({ weight: index + 1 }).eq('id', id)
+  )
+
+  await Promise.all(updates)
+
+  revalidatePath('/app/admin/templates/[id]')
 }
