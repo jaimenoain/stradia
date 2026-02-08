@@ -9,7 +9,15 @@ import { useTemplate } from '@/hooks/use-template'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { publishTemplateVersion, createTemplateVersion } from './actions'
+import { TaskEditor } from '@/components/template-editor/task-editor'
+import {
+  publishTemplateVersion,
+  createTemplateVersion,
+  addTask,
+  updateTask,
+  deleteTask,
+  reorderTasks
+} from './actions'
 
 export default function TemplatePage() {
   const params = useParams()
@@ -35,7 +43,7 @@ export default function TemplatePage() {
     )
   }
 
-  const { template, versions } = data
+  const { template, versions, tasks } = data
   const latestVersion = versions && versions.length > 0 ? versions[0] : null
 
   const handlePublish = async () => {
@@ -96,17 +104,45 @@ export default function TemplatePage() {
                <CardTitle>Template Editor</CardTitle>
              </CardHeader>
              <CardContent>
-               <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-lg bg-muted/50">
-                 <FileText className="h-10 w-10 text-muted-foreground mb-4" />
-                 <h3 className="font-semibold text-lg">
-                   {isPublished ? 'Read-Only Mode' : 'Editor Ready'}
-                 </h3>
-                 <p className="text-sm text-muted-foreground max-w-sm mt-2">
-                   {isPublished
-                     ? 'This version is published and cannot be edited. Create a new draft to make changes.'
-                     : 'This is the shell for the template editor. Task management UI will be implemented here.'}
-                 </p>
-               </div>
+                {!latestVersion ? (
+                   <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-lg bg-muted/50">
+                     <FileText className="h-10 w-10 text-muted-foreground mb-4" />
+                     <h3 className="font-semibold text-lg">No Draft Available</h3>
+                     <p className="text-sm text-muted-foreground max-w-sm mt-2">
+                       Start a new draft to begin editing tasks.
+                     </p>
+                   </div>
+                ) : (
+                 <TaskEditor
+                   tasks={tasks || []}
+                   readOnly={isPublished || isArchived}
+                   onAddTask={async (t) => {
+                     if (!latestVersion) return
+                     try {
+                        await addTask(latestVersion.id, t)
+                        queryClient.invalidateQueries({ queryKey: ['template', templateId] })
+                     } catch (e) { console.error(e); alert('Failed to add task'); }
+                   }}
+                   onUpdateTask={async (taskId, updates) => {
+                     try {
+                       await updateTask(taskId, updates)
+                       queryClient.invalidateQueries({ queryKey: ['template', templateId] })
+                     } catch (e) { console.error(e); alert('Failed to update task'); }
+                   }}
+                   onDeleteTask={async (taskId) => {
+                     try {
+                        await deleteTask(taskId)
+                        queryClient.invalidateQueries({ queryKey: ['template', templateId] })
+                     } catch (e) { console.error(e); alert('Failed to delete task'); }
+                   }}
+                   onReorderTasks={async (items) => {
+                     try {
+                        await reorderTasks(items)
+                        queryClient.invalidateQueries({ queryKey: ['template', templateId] })
+                     } catch (e) { console.error(e); alert('Failed to reorder tasks'); }
+                   }}
+                 />
+                )}
              </CardContent>
            </Card>
         </div>
