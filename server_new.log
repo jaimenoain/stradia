@@ -1,0 +1,30 @@
+
+> web@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+- Environments: .env.local
+
+✓ Starting...
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+✓ Ready in 2.6s
+ GET /login 200 in 1026ms (compile: 436ms, proxy.ts: 134ms, render: 456ms)
+ GET /app 200 in 2.3s (compile: 979ms, proxy.ts: 559ms, render: 773ms)
+ POST /login 303 in 3.0s (compile: 7ms, proxy.ts: 16ms, render: 3.0s)
+ GET /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard 200 in 3.9s (compile: 3.1s, proxy.ts: 318ms, render: 495ms)
+ GET /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard 200 in 821ms (compile: 50ms, proxy.ts: 313ms, render: 458ms)
+ GET /login 200 in 87ms (compile: 6ms, proxy.ts: 8ms, render: 73ms)
+ GET /app 200 in 1354ms (compile: 5ms, proxy.ts: 684ms, render: 665ms)
+ POST /login 303 in 2.1s (compile: 6ms, proxy.ts: 7ms, render: 2.1s)
+ GET /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard 200 in 911ms (compile: 43ms, proxy.ts: 366ms, render: 501ms)
+ GET /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard 200 in 778ms (compile: 10ms, proxy.ts: 335ms, render: 434ms)
+ GET /login 200 in 136ms (compile: 7ms, proxy.ts: 10ms, render: 119ms)
+ GET /app 200 in 1140ms (compile: 6ms, proxy.ts: 508ms, render: 626ms)
+ POST /login 303 in 1596ms (compile: 8ms, proxy.ts: 9ms, render: 1579ms)
+ GET /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard 200 in 750ms (compile: 33ms, proxy.ts: 306ms, render: 412ms)
+ GET /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard 200 in 717ms (compile: 21ms, proxy.ts: 306ms, render: 390ms)
+ POST /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard 200 in 1120ms (compile: 31ms, proxy.ts: 356ms, render: 733ms)
+ POST /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard 200 in 1055ms (compile: 37ms, proxy.ts: 346ms, render: 672ms)
+ GET /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard 200 in 1021ms (compile: 32ms, proxy.ts: 344ms, render: 645ms)
