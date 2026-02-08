@@ -138,3 +138,83 @@ export async function createTemplateVersion(templateId: string) {
   revalidatePath('/app/admin/templates/[id]')
   return newVersion
 }
+
+export async function addTask(versionId: string, task: any) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  // Get max weight
+  const { data: tasks } = await supabase
+    .from('template_tasks')
+    .select('weight')
+    .eq('template_version_id', versionId)
+    .order('weight', { ascending: false })
+    .limit(1)
+
+  const maxWeight = tasks && tasks.length > 0 ? tasks[0].weight : 0
+  const weight = maxWeight + 10
+
+  const { error } = await supabase.from('template_tasks').insert({
+    template_version_id: versionId,
+    title: task.title,
+    description: task.description,
+    task_type: task.task_type,
+    is_optional: task.is_optional,
+    task_config: task.task_config || {},
+    weight,
+  })
+
+  if (error) {
+    console.error('Error adding task:', error)
+    throw new Error(error.message)
+  }
+  revalidatePath('/app/admin/templates/[id]')
+}
+
+export async function updateTask(taskId: string, updates: any) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const { error } = await supabase
+    .from('template_tasks')
+    .update(updates)
+    .eq('id', taskId)
+
+  if (error) {
+    console.error('Error updating task:', error)
+    throw new Error(error.message)
+  }
+  revalidatePath('/app/admin/templates/[id]')
+}
+
+export async function deleteTask(taskId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const { error } = await supabase
+    .from('template_tasks')
+    .delete()
+    .eq('id', taskId)
+
+  if (error) {
+    console.error('Error deleting task:', error)
+    throw new Error(error.message)
+  }
+  revalidatePath('/app/admin/templates/[id]')
+}
+
+export async function reorderTasks(items: { id: string; weight: number }[]) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const updates = items.map(item =>
+    supabase.from('template_tasks').update({ weight: item.weight }).eq('id', item.id)
+  )
+
+  await Promise.all(updates)
+  revalidatePath('/app/admin/templates/[id]')
+}
