@@ -10,6 +10,10 @@ export function useMarkets() {
   return useQuery({
     queryKey: ['markets'],
     queryFn: async () => {
+      if (!supabase) {
+        return [] as Market[]
+      }
+
       const { data, error } = await supabase
         .from('markets')
         .select('*')
@@ -21,5 +25,6 @@ export function useMarkets() {
 
       return data as Market[]
     },
+    enabled: !!supabase,
   })
 }
