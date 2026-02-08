@@ -1,0 +1,62 @@
+
+> web@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+
+✓ Starting...
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+✓ Ready in 1906ms
+Supabase environment variables are missing. Middleware is skipping authentication checks.
+○ Compiling /login ...
+ GET /login 200 in 8.0s (compile: 7.1s, proxy.ts: 239ms, render: 665ms)
+Supabase environment variables are missing. Middleware is skipping authentication checks.
+⨯ Error: Your project's URL and Key are required to create a Supabase client!
+
+Check your Supabase project's API settings to find these values
+
+https://supabase.com/dashboard/project/_/settings/api
+    at <unknown> (https://supabase.com/dashboard/project/_/settings/api)
+    at createClient (lib/supabase/server.ts:7:28)
+    at async login (app/login/actions.ts:9:20)
+   5 |   const cookieStore = await cookies()
+   6 |
+>  7 |   return createServerClient(
+     |                            ^
+   8 |     process.env.NEXT_PUBLIC_SUPABASE_URL!,
+   9 |     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  10 |     { {
+  digest: '1814929425'
+}
+ POST /login 500 in 1804ms (compile: 23ms, proxy.ts: 28ms, render: 1754ms)
+Supabase environment variables are missing. Middleware is skipping authentication checks.
+ GET /login 200 in 119ms (compile: 6ms, proxy.ts: 12ms, render: 100ms)
+Supabase environment variables are missing. Middleware is skipping authentication checks.
+⨯ Error: Your project's URL and Key are required to create a Supabase client!
+
+Check your Supabase project's API settings to find these values
+
+https://supabase.com/dashboard/project/_/settings/api
+    at <unknown> (https://supabase.com/dashboard/project/_/settings/api)
+    at createClient (lib/supabase/server.ts:7:28)
+    at async login (app/login/actions.ts:9:20)
+   5 |   const cookieStore = await cookies()
+   6 |
+>  7 |   return createServerClient(
+     |                            ^
+   8 |     process.env.NEXT_PUBLIC_SUPABASE_URL!,
+   9 |     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  10 |     { {
+  digest: '1814929425'
+}
+ POST /login 500 in 558ms (compile: 5ms, proxy.ts: 8ms, render: 546ms)
+  Reload env: .env.local
+✓ Compiled in 630ms
+[?25h

@@ -66,3 +66,63 @@ export async function rejectTask(marketId: string, originTemplateTaskId: string)
 
   return data
 }
+
+export async function updateTaskStatus(marketId: string, taskId: string, newStatus: string) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('Unauthorized')
+  }
+
+  const validStatuses = ['TODO', 'IN_PROGRESS', 'REVIEW', 'DONE', 'DRIFTED']
+  if (!validStatuses.includes(newStatus)) {
+    throw new Error('Invalid status')
+  }
+
+  // Check task type constraint if moving to DONE
+  if (newStatus === 'DONE') {
+    const { data: task, error: fetchError } = await supabase
+      .from('market_tasks')
+      .select(`
+        origin_template_task_id,
+        template_tasks (
+          task_type
+        )
+      `)
+      .eq('id', taskId)
+      .single()
+
+    if (fetchError || !task) {
+      console.error('Error fetching task for validation:', fetchError)
+      throw new Error('Task not found')
+    }
+
+    // @ts-ignore
+    const taskType = task.template_tasks?.task_type
+
+    if (taskType === 'B' || taskType === 'C') {
+      throw new Error('Type B and C tasks cannot be manually moved to DONE')
+    }
+  }
+
+  const { data, error } = await supabase
+    .from('market_tasks')
+    .update({ status: newStatus })
+    .eq('id', taskId)
+    .eq('market_id', marketId)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error updating task status:', error)
+    throw new Error('Failed to update task status')
+  }
+
+  revalidatePath(`/app/${marketId}/dashboard`)
+
+  return data
+}
