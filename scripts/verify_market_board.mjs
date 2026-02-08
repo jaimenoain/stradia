@@ -28,119 +28,225 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
 });
 
 async function main() {
-  console.log('Setting up test data...');
-  // 1. Create Org
+  console.log('Running QA Verification for get_market_board...');
+
+  // 1. Setup Common Data (Org & Market)
+  const timestamp = Date.now();
   const { data: org, error: orgError } = await supabase.from('organizations').insert({
-    name: 'Ghost Logic Verification Org ' + Date.now()
+    name: 'QA Org ' + timestamp
   }).select().single();
   if (orgError) throw orgError;
   const orgId = org.id;
   console.log('Created Org:', orgId);
 
-  // 2. Create Market
   const { data: market, error: marketError } = await supabase.from('markets').insert({
     org_id: orgId,
-    name: 'Ghost Logic Market'
+    name: 'QA Market'
   }).select().single();
   if (marketError) throw marketError;
   const marketId = market.id;
   console.log('Created Market:', marketId);
 
-  // 3. Create Template
-  const { data: template, error: templateError } = await supabase.from('templates').insert({
-    owner_org_id: orgId,
-    name: 'Ghost Logic Template'
-  }).select().single();
-  if (templateError) throw templateError;
-  const templateId = template.id;
-  console.log('Created Template:', templateId);
+  // --- Scenario 1: Hybrid State (1 Mandatory, 1 Optional) ---
+  console.log('\n--- Scenario 1: Hybrid State (1 Mandatory, 1 Optional) ---');
 
-  // 4. Create Version
-  const { data: version, error: versionError } = await supabase.from('template_versions').insert({
-    template_id: templateId,
+  const { data: template1, error: t1Error } = await supabase.from('templates').insert({
+    owner_org_id: orgId,
+    name: 'Hybrid Template'
+  }).select().single();
+  if (t1Error) throw t1Error;
+
+  const { data: version1, error: v1Error } = await supabase.from('template_versions').insert({
+    template_id: template1.id,
     version_string: '1.0.0',
     status: 'DRAFT'
   }).select().single();
-  if (versionError) throw versionError;
-  const versionId = version.id;
-  console.log('Created Version:', versionId);
+  if (v1Error) throw v1Error;
 
-  // 5. Create Tasks
-  // Task 1: Required (Should be Real)
-  const { data: taskReal, error: taskRealError } = await supabase.from('template_tasks').insert({
-    template_version_id: versionId,
-    title: 'Required Task',
+  // Mandatory Task
+  const { data: taskMandatory, error: tmError } = await supabase.from('template_tasks').insert({
+    template_version_id: version1.id,
+    title: 'Mandatory Task',
     task_type: 'A',
     is_optional: false,
     weight: 1
   }).select().single();
-  if (taskRealError) throw taskRealError;
-  console.log('Created Required Task:', taskReal.id);
+  if (tmError) throw tmError;
 
-  // Task 2: Optional (Should be Ghost)
-  const { data: taskGhost, error: taskGhostError } = await supabase.from('template_tasks').insert({
-    template_version_id: versionId,
+  // Optional Task
+  const { data: taskOptional, error: toError } = await supabase.from('template_tasks').insert({
+    template_version_id: version1.id,
     title: 'Optional Task',
     task_type: 'B',
     is_optional: true,
     weight: 2
   }).select().single();
-  if (taskGhostError) throw taskGhostError;
-  console.log('Created Optional Task:', taskGhost.id);
+  if (toError) throw toError;
 
-  // 6. Deploy Strategy
-  console.log('Deploying Strategy...');
-  const { error: deployError } = await supabase.rpc('deploy_strategy', {
+  // Publish Version 1
+  const { error: p1Error } = await supabase.from('template_versions')
+    .update({ status: 'PUBLISHED' })
+    .eq('id', version1.id);
+  if (p1Error) throw p1Error;
+
+  // Deploy Strategy
+  console.log('Deploying Hybrid Strategy...');
+  const { error: d1Error } = await supabase.rpc('deploy_strategy', {
     p_market_id: marketId,
-    p_version_id: versionId
+    p_version_id: version1.id
   });
-  if (deployError) throw deployError;
-  console.log('Strategy Deployed.');
+  if (d1Error) throw d1Error;
 
-  // 7. Call get_market_board
-  console.log('Calling get_market_board...');
-  const { data: board, error: rpcError } = await supabase.rpc('get_market_board', {
+  // Verify Board
+  let { data: board1, error: b1Error } = await supabase.rpc('get_market_board', {
     target_market_id: marketId
   });
+  if (b1Error) throw b1Error;
 
-  if (rpcError) {
-    if (rpcError.code === 'PGRST202' || (rpcError.message && rpcError.message.includes('Could not find the function'))) {
-      console.warn('\n---------------------------------------------------');
-      console.warn('WARNING: Function get_market_board not found (PGRST202).');
-      console.warn('Migration supabase/migrations/20240528000000_get_market_board_rpc.sql needs to be applied manually.');
-      console.warn('---------------------------------------------------\n');
-      process.exit(0); // Exit gracefully as this is expected in current env
-    }
-    throw rpcError;
+  console.log('Hybrid Board Length:', board1.length);
+  if (board1.length !== 2) throw new Error(`Expected 2 tasks, got ${board1.length}`);
+
+  const hybridReal = board1.find(t => t.origin_template_task_id === taskMandatory.id);
+  const hybridGhost = board1.find(t => t.origin_template_task_id === taskOptional.id);
+
+  if (!hybridReal || hybridReal.is_ghost !== false || hybridReal.status !== 'TODO' || hybridReal.id.startsWith('temp_')) {
+    throw new Error('Hybrid State: Mandatory task check failed (should be Real/TODO)');
   }
-
-  console.log('Board Data:', JSON.stringify(board, null, 2));
-
-  // 8. Verify Logic
-  if (!Array.isArray(board)) {
-    throw new Error('Board data is not an array');
+  if (!hybridGhost || hybridGhost.is_ghost !== true || hybridGhost.status !== 'GHOST' || !hybridGhost.id.startsWith('temp_')) {
+    throw new Error('Hybrid State: Optional task check failed (should be Ghost)');
   }
+  console.log('Scenario 1 PASSED.');
 
-  const realTask = board.find(t => t.origin_template_task_id === taskReal.id);
-  const ghostTask = board.find(t => t.origin_template_task_id === taskGhost.id);
 
-  if (!realTask) throw new Error('Real Task not found in board');
-  if (!ghostTask) throw new Error('Ghost Task not found in board');
+  // --- Scenario 2: Zero-State (All Optional) ---
+  console.log('\n--- Scenario 2: Zero-State (2 Optional Tasks) ---');
 
-  // Check Real Task
-  if (realTask.is_ghost !== false) throw new Error('Real Task should have is_ghost = false');
-  if (realTask.status !== 'TODO') throw new Error('Real Task should have status TODO');
-  if (realTask.id.startsWith('temp_')) throw new Error('Real Task should have real UUID');
+  // New Market for isolation (or reuse same market but new deployment overrides?)
+  // deploy_strategy updates deployment time, so get_market_board picks the latest.
+  // But market_tasks from previous deployment persist if they match origin_template_task_id?
+  // No, market_tasks are linked to origin_template_task_id. If new version has NEW tasks (different IDs), old tasks remain but won't match.
+  // However, get_market_board filters by:
+  //   join public.template_versions tv on tv.id = ms.template_version_id
+  //   join public.template_tasks tt on tt.template_version_id = tv.id
+  // So it only returns tasks from the CURRENT version. Old tasks from previous version are ignored.
+  // So I can reuse the market if I use a NEW version.
 
-  // Check Ghost Task
-  if (ghostTask.is_ghost !== true) throw new Error('Ghost Task should have is_ghost = true');
-  if (ghostTask.status !== 'GHOST') throw new Error('Ghost Task should have status GHOST');
-  if (!ghostTask.id.startsWith('temp_')) throw new Error('Ghost Task should have temp ID');
+  const { data: version2, error: v2Error } = await supabase.from('template_versions').insert({
+    template_id: template1.id,
+    version_string: '2.0.0',
+    status: 'DRAFT'
+  }).select().single();
+  if (v2Error) throw v2Error;
 
-  console.log('VERIFICATION SUCCESSFUL: Ghost Card logic works as expected.');
+  // 2 Optional Tasks (New IDs)
+  const { data: taskOpt1, error: to1Error } = await supabase.from('template_tasks').insert({
+    template_version_id: version2.id,
+    title: 'Optional Task 1',
+    task_type: 'A',
+    is_optional: true,
+    weight: 1
+  }).select().single();
+  if (to1Error) throw to1Error;
+
+  const { data: taskOpt2, error: to2Error } = await supabase.from('template_tasks').insert({
+    template_version_id: version2.id,
+    title: 'Optional Task 2',
+    task_type: 'B',
+    is_optional: true,
+    weight: 2
+  }).select().single();
+  if (to2Error) throw to2Error;
+
+  // Publish Version 2
+  const { error: p2Error } = await supabase.from('template_versions')
+    .update({ status: 'PUBLISHED' })
+    .eq('id', version2.id);
+  if (p2Error) throw p2Error;
+
+  // Deploy Strategy Version 2
+  console.log('Deploying Zero-State Strategy...');
+  const { error: d2Error } = await supabase.rpc('deploy_strategy', {
+    p_market_id: marketId,
+    p_version_id: version2.id
+  });
+  if (d2Error) throw d2Error;
+
+  // Verify Board
+  const { data: board2, error: b2Error } = await supabase.rpc('get_market_board', {
+    target_market_id: marketId
+  });
+  if (b2Error) throw b2Error;
+
+  console.log('Zero-State Board Length:', board2.length);
+  if (board2.length !== 2) throw new Error(`Expected 2 tasks, got ${board2.length}`);
+
+  const ghost1 = board2.find(t => t.origin_template_task_id === taskOpt1.id);
+  const ghost2 = board2.find(t => t.origin_template_task_id === taskOpt2.id);
+
+  if (!ghost1 || ghost1.is_ghost !== true || ghost1.status !== 'GHOST' || !ghost1.id.startsWith('temp_')) {
+    throw new Error('Zero-State: Task 1 check failed (should be Ghost)');
+  }
+  if (!ghost2 || ghost2.is_ghost !== true || ghost2.status !== 'GHOST' || !ghost2.id.startsWith('temp_')) {
+    throw new Error('Zero-State: Task 2 check failed (should be Ghost)');
+  }
+  console.log('Scenario 2 PASSED.');
+
+
+  // --- Scenario 3: Accepted Optional (Hybrid -> Accepted) ---
+  console.log('\n--- Scenario 3: Accepted Optional ---');
+
+  // Reuse Scenario 1 Setup. Since we deployed Version 2, we need to deploy Version 1 again to get back to Hybrid state?
+  // Or just create a new market for clarity. Let's create a new market.
+  const { data: market2, error: market2Error } = await supabase.from('markets').insert({
+    org_id: orgId,
+    name: 'QA Market 2'
+  }).select().single();
+  if (market2Error) throw market2Error;
+
+  // Deploy Version 1 (Hybrid) to Market 2
+  console.log('Deploying Hybrid Strategy to Market 2...');
+  await supabase.rpc('deploy_strategy', {
+    p_market_id: market2.id,
+    p_version_id: version1.id
+  });
+
+  // Verify initial state (1 Real, 1 Ghost)
+  let { data: board3_init } = await supabase.rpc('get_market_board', { target_market_id: market2.id });
+  // (Assuming it passes as per Scenario 1)
+
+  // Manually insert the optional task (simulating acceptance)
+  console.log('Manually accepting Optional Task...');
+  const { error: acceptError } = await supabase.from('market_tasks').insert({
+    market_id: market2.id,
+    origin_template_task_id: taskOptional.id,
+    status: 'TODO'
+  });
+  if (acceptError) throw acceptError;
+
+  // Verify Board
+  const { data: board3, error: b3Error } = await supabase.rpc('get_market_board', {
+    target_market_id: market2.id
+  });
+  if (b3Error) throw b3Error;
+
+  console.log('Accepted Board Length:', board3.length);
+  if (board3.length !== 2) throw new Error(`Expected 2 tasks, got ${board3.length}`);
+
+  const acceptedReal = board3.find(t => t.origin_template_task_id === taskOptional.id);
+  const mandatoryReal = board3.find(t => t.origin_template_task_id === taskMandatory.id);
+
+  if (!acceptedReal || acceptedReal.is_ghost !== false || acceptedReal.status !== 'TODO' || acceptedReal.id.startsWith('temp_')) {
+    throw new Error('Accepted Optional: Task check failed (should be Real/TODO)');
+  }
+  if (!mandatoryReal || mandatoryReal.is_ghost !== false) {
+     throw new Error('Accepted Optional: Mandatory task check failed (should still be Real)');
+  }
+  console.log('Scenario 3 PASSED.');
+
+  console.log('\nALL VERIFICATION PASSED SUCCESSFULLY.');
 }
 
 main().catch(err => {
-  console.error('Verification Failed:', err);
+  console.error('\nVERIFICATION FAILED:', err);
   process.exit(1);
 });
