@@ -10,6 +10,14 @@ export function useTemplate(templateId: string) {
   return useQuery({
     queryKey: ['template', templateId],
     queryFn: async () => {
+      if (!supabase) {
+        return {
+          template: null as unknown as Template,
+          versions: [] as TemplateVersion[],
+          tasks: [] as TemplateTask[],
+        }
+      }
+
       // Fetch template
       const { data: template, error: templateError } = await supabase
         .from('templates')
@@ -49,6 +57,6 @@ export function useTemplate(templateId: string) {
         tasks,
       }
     },
-    enabled: !!templateId,
+    enabled: !!templateId && !!supabase,
   })
 }
