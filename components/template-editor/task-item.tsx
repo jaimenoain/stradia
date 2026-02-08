@@ -5,10 +5,10 @@ import { Trash2, ArrowUp, ArrowDown } from 'lucide-react'
 import { TemplateTask } from '@/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
 
 interface TaskItemProps {
   task: TemplateTask
@@ -43,12 +43,6 @@ export function TaskItem({
   const handleTitleBlur = () => {
     if (title !== task.title) {
       onUpdateTask(task.id, { title })
-    }
-  }
-
-  const handleDescriptionBlur = () => {
-    if (description !== (task.description || '')) {
-      onUpdateTask(task.id, { description })
     }
   }
 
@@ -108,10 +102,14 @@ export function TaskItem({
 
             <div className="space-y-2">
                <Label className="text-xs text-muted-foreground">Description (Rich Text)</Label>
-               <Textarea
+               <RichTextEditor
                  value={description}
-                 onChange={(e) => setDescription(e.target.value)}
-                 onBlur={handleDescriptionBlur}
+                 onChange={setDescription}
+                 onBlur={(htmlContent) => {
+                    if (htmlContent !== (task.description || '')) {
+                      onUpdateTask(task.id, { description: htmlContent })
+                    }
+                 }}
                  disabled={readOnly}
                  className="min-h-[100px]"
                />
