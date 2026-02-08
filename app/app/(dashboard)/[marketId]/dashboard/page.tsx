@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { EmptyState } from '@/components/dashboard/empty-state'
+import { MarketBoard } from '@/components/dashboard/market-board'
 
 export default async function DashboardPage({
   params,
@@ -33,9 +33,6 @@ export default async function DashboardPage({
     )
   }
 
-  // Logic: check for active strategies/tasks. For now, always empty.
-  const activeStrategies: any[] = []
-
   return (
     <div className="flex flex-col h-full w-full p-8 space-y-8">
       <div className="flex items-center justify-between space-y-2">
@@ -47,16 +44,9 @@ export default async function DashboardPage({
         </div>
       </div>
 
-      {activeStrategies.length === 0 ? (
-        <div className="flex flex-1 items-center justify-center rounded-lg">
-            <EmptyState marketId={marketId} />
-        </div>
-      ) : (
-        <div>
-            {/* Future dashboard content */}
-            <p>Active Strategies: {activeStrategies.length}</p>
-        </div>
-      )}
+      <div className="flex-1 overflow-hidden">
+        <MarketBoard marketId={marketId} />
+      </div>
     </div>
   )
 }
