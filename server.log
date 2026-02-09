@@ -7,25 +7,33 @@
 - Network:       http://192.168.0.2:3000
 
 ✓ Starting...
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-✓ Ready in 2s
-  Reload env: .env.local
-✓ Compiled in 75ms
-○ Compiling /login ...
- GET /login 200 in 4.6s (compile: 4.0s, proxy.ts: 140ms, render: 430ms)
- GET /app 200 in 2.1s (compile: 746ms, proxy.ts: 476ms, render: 857ms)
- POST /login 303 in 2.5s (compile: 7ms, proxy.ts: 15ms, render: 2.5s)
- GET /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard 200 in 4.5s (compile: 3.7s, proxy.ts: 321ms, render: 434ms)
- GET /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard 200 in 1005ms (compile: 32ms, proxy.ts: 568ms, render: 405ms)
- GET /login 200 in 94ms (compile: 6ms, proxy.ts: 9ms, render: 80ms)
- GET /app 200 in 917ms (compile: 5ms, proxy.ts: 335ms, render: 577ms)
- POST /login 303 in 1543ms (compile: 4ms, proxy.ts: 8ms, render: 1530ms)
- GET /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard 200 in 730ms (compile: 37ms, proxy.ts: 308ms, render: 385ms)
- GET /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard 200 in 708ms (compile: 29ms, proxy.ts: 315ms, render: 364ms)
- GET /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard?taskId=ae9d61dc-8978-4fb4-a292-21dabb137ac7 200 in 760ms (compile: 30ms, proxy.ts: 353ms, render: 376ms)
- GET /login 200 in 361ms (compile: 97ms, proxy.ts: 86ms, render: 177ms)
- GET /app 200 in 1393ms (compile: 22ms, proxy.ts: 748ms, render: 623ms)
- POST /login 303 in 2.0s (compile: 5ms, proxy.ts: 7ms, render: 2.0s)
- GET /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard 200 in 851ms (compile: 91ms, proxy.ts: 352ms, render: 408ms)
- GET /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard 200 in 768ms (compile: 9ms, proxy.ts: 390ms, render: 369ms)
- GET /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard?taskId=ae9d61dc-8978-4fb4-a292-21dabb137ac7 200 in 895ms (compile: 57ms, proxy.ts: 365ms, render: 473ms)
+✓ Ready in 1721ms
+Supabase environment variables are missing. Middleware is skipping authentication checks.
+○ Compiling /app/[marketId]/dashboard ...
+Supabase URL or Key is missing. Returning null client.
+Supabase URL or Key is missing. Returning null client.
+Supabase URL or Key is missing. Returning null client.
+⨯ Error: Your project's URL and Key are required to create a Supabase client!
+
+Check your Supabase project's API settings to find these values
+
+https://supabase.com/dashboard/project/_/settings/api
+    at <unknown> (https://supabase.com/dashboard/project/_/settings/api)
+    at createClient (lib/supabase/server.ts:7:28)
+    at async DashboardPage (app/app/(dashboard)/[marketId]/dashboard/page.tsx:11:20)
+   5 |   const cookieStore = await cookies()
+   6 |
+>  7 |   return createServerClient(
+     |                            ^
+   8 |     process.env.NEXT_PUBLIC_SUPABASE_URL!,
+   9 |     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  10 |     { {
+  digest: '1182618848'
+}
+ GET /app/market-123/dashboard 500 in 10.5s (compile: 9.4s, proxy.ts: 188ms, render: 892ms)
