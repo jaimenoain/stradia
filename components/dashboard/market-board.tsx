@@ -58,7 +58,6 @@ export function MarketBoard({ marketId }: MarketBoardProps) {
       if (error) throw error
       return (data || []) as MarketBoardTask[]
     },
-    enabled: !!supabase,
   })
 
   const { mutate: accept } = useMutation({
