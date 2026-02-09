@@ -5,7 +5,6 @@
 ▲ Next.js 16.1.6 (Turbopack)
 - Local:         http://localhost:3000
 - Network:       http://192.168.0.2:3000
-- Environments: .env.local
 
 ✓ Starting...
 Attention: Next.js now collects completely anonymous telemetry regarding usage.
@@ -14,15 +13,4 @@ You can learn more, including how to opt-out if you'd not like to participate in
 https://nextjs.org/telemetry
 
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-✓ Ready in 1970ms
-○ Compiling /login ...
- GET /login 200 in 7.1s (compile: 6.3s, proxy.ts: 315ms, render: 502ms)
- GET /app 200 in 1935ms (compile: 883ms, proxy.ts: 430ms, render: 623ms)
- POST /login 303 in 2.8s (compile: 13ms, proxy.ts: 21ms, render: 2.7s)
- GET /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard 200 in 5.3s (compile: 4.1s, proxy.ts: 307ms, render: 973ms)
- GET /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard 200 in 5.4s (compile: 4.0s, proxy.ts: 345ms, render: 1016ms)
- GET /login 200 in 133ms (compile: 7ms, proxy.ts: 9ms, render: 117ms)
- GET /app 200 in 976ms (compile: 6ms, proxy.ts: 355ms, render: 616ms)
- POST /login 303 in 1328ms (compile: 7ms, proxy.ts: 8ms, render: 1313ms)
- GET /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard 200 in 819ms (compile: 9ms, proxy.ts: 458ms, render: 352ms)
- GET /app/4fd47db3-bb2b-4a21-bb93-5e0623d08e55/dashboard 200 in 1012ms (compile: 46ms, proxy.ts: 318ms, render: 647ms)
+✓ Ready in 1738ms
