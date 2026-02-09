@@ -65,6 +65,9 @@ export function TaskDetailSheet({ tasks }: TaskDetailSheetProps) {
                 {task.title}
               </SheetTitle>
             </div>
+            <SheetDescription className="sr-only">
+              Task details for {task.title}
+            </SheetDescription>
 
             <div className="flex items-center gap-2 text-sm">
               <Badge variant={
