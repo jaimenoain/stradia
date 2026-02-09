@@ -261,7 +261,7 @@ export function MarketBoard({ marketId }: MarketBoardProps) {
             <CreateTaskDialog
               marketId={marketId}
               trigger={
-                <Button variant="ghost" size="icon" className="h-6 w-6">
+                <Button variant="ghost" size="icon" className="h-6 w-6" aria-label="Create Task">
                   <Plus className="h-4 w-4" />
                 </Button>
               }
