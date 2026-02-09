@@ -21,6 +21,11 @@ export function VaultCard({ provider, isConnected, marketId }: VaultCardProps) {
   const supabase = createClient()
 
   const handleConnect = async () => {
+    if (!supabase) {
+      console.error('Supabase client not initialized')
+      return
+    }
+
     if (provider === 'GTM') {
       setLoading(true)
       try {
