@@ -80,7 +80,8 @@ Generate a valid JSON object based on the above. output JSON only.
     // Attempt to parse JSON to ensure validity
     // Sometimes Gemini wraps code in markdown blocks like ```json ... ```
     let jsonStr = text;
-    const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/) || text.match(/```\n([\s\S]*?)\n```/);
+    // Improved Logic: Allow optional 'json' tag, and optional whitespace/newlines inside the block boundaries.
+    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
     if (jsonMatch) {
         jsonStr = jsonMatch[1];
     }
