@@ -33,7 +33,7 @@ Generate a valid JSON object based on the above. output JSON only.
             console.log("Raw Response:", text);
 
             let jsonStr = text;
-            const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/) || text.match(/```\n([\s\S]*?)\n```/);
+            const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
             if (jsonMatch) {
                 jsonStr = jsonMatch[1];
             }
@@ -58,24 +58,31 @@ Generate a valid JSON object based on the above. output JSON only.
         console.log("Testing Mock Response Parsing...");
         const mockResponse = "```json\n{\n  \"action\": \"create_tag\",\n  \"container_id\": \"GTM-123\"\n}\n```";
 
-        let jsonStr = mockResponse;
-        const jsonMatch = mockResponse.match(/```json\n([\s\S]*?)\n```/) || mockResponse.match(/```\n([\s\S]*?)\n```/);
-        if (jsonMatch) {
-            jsonStr = jsonMatch[1];
-        }
+        // Edge Case: No newlines
+        const mockResponseEdge = "```json{\"action\": \"create_tag\", \"container_id\": \"GTM-123\"}```";
 
-        try {
-            const parsed = JSON.parse(jsonStr);
-            console.log("Parsed Mock JSON:", parsed);
-             if (parsed.action === "create_tag" && parsed.container_id === "GTM-123") {
-                 console.log("SUCCESS: Mock parsing logic works.");
-             } else {
-                 console.error("FAILURE: Mock parsing result incorrect.");
-                 process.exit(1);
+        const testCases = [mockResponse, mockResponseEdge];
+
+        for (const input of testCases) {
+             let jsonStr = input;
+             const jsonMatch = input.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+             if (jsonMatch) {
+                 jsonStr = jsonMatch[1];
              }
-        } catch (e) {
-             console.error("FAILURE: Mock parsing failed.", e);
-             process.exit(1);
+
+             try {
+                 const parsed = JSON.parse(jsonStr);
+                 console.log("Parsed Mock JSON:", parsed);
+                  if (parsed.action === "create_tag" && parsed.container_id === "GTM-123") {
+                      console.log("SUCCESS: Mock parsing logic works.");
+                  } else {
+                      console.error("FAILURE: Mock parsing result incorrect.");
+                      process.exit(1);
+                  }
+             } catch (e) {
+                  console.error("FAILURE: Mock parsing failed.", e);
+                  process.exit(1);
+             }
         }
     }
 }
