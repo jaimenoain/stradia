@@ -1,12 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { VaultProvider } from './types'
 import { VaultConnectionDialog } from './vault-connection-dialog'
-import { Check, X, ShieldCheck } from 'lucide-react'
+import { Check, X, ShieldCheck, Loader2 } from 'lucide-react'
 
 interface VaultCardProps {
   provider: VaultProvider
@@ -16,6 +17,38 @@ interface VaultCardProps {
 
 export function VaultCard({ provider, isConnected, marketId }: VaultCardProps) {
   const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const supabase = createClient()
+
+  const handleConnect = async () => {
+    if (provider === 'GTM') {
+      setLoading(true)
+      try {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            scopes: 'https://www.googleapis.com/auth/tagmanager.edit.containers https://www.googleapis.com/auth/analytics.edit',
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'consent',
+            },
+            redirectTo: `${window.location.origin}/auth/callback?next=/app/${marketId}/settings/vault&type=vault_connect&market_id=${marketId}&provider=GTM`,
+          },
+        })
+        if (error) {
+           console.error('OAuth error:', error)
+           setLoading(false)
+        }
+      } catch (err) {
+        console.error('Unexpected error:', err)
+        setLoading(false)
+      }
+    } else {
+      setOpen(true)
+    }
+  }
+
+  const isOAuthProvider = provider === 'GTM'
 
   return (
     <>
@@ -41,32 +74,42 @@ export function VaultCard({ provider, isConnected, marketId }: VaultCardProps) {
           <CardDescription>
             {isConnected
               ? `Your ${provider} integration is active.`
-              : `Connect your ${provider} account.`}
+              : isOAuthProvider
+                ? `Connect your ${provider} account.`
+                : `Connect your ${provider} account.`}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
             {isConnected
               ? 'Credentials are encrypted and stored securely in your vault.'
-              : 'Enter your API key or token to enable this integration.'}
+              : isOAuthProvider
+                ? 'Connect with your provider account to enable this integration.'
+                : 'Enter your API key or token to enable this integration.'}
           </p>
         </CardContent>
         <CardFooter>
           <Button
             variant={isConnected ? "outline" : "default"}
-            onClick={() => setOpen(true)}
+            onClick={handleConnect}
             className="w-full"
+            disabled={loading}
           >
-            {isConnected ? 'Update Credentials' : 'Connect'}
+            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isConnected
+              ? isOAuthProvider ? 'Reconnect' : 'Update Credentials'
+              : isOAuthProvider ? `Connect ${provider}` : 'Connect'}
           </Button>
         </CardFooter>
       </Card>
-      <VaultConnectionDialog
-        open={open}
-        onOpenChange={setOpen}
-        marketId={marketId}
-        provider={provider}
-      />
+      {!isOAuthProvider && (
+        <VaultConnectionDialog
+          open={open}
+          onOpenChange={setOpen}
+          marketId={marketId}
+          provider={provider}
+        />
+      )}
     </>
   )
 }
