@@ -15,6 +15,7 @@ interface KanbanColumnProps {
   onTaskClick?: (taskId: string) => void
   isDropDisabled?: boolean
   isDragDisabled?: boolean
+  headerAction?: React.ReactNode
 }
 
 export function KanbanColumn({
@@ -25,7 +26,8 @@ export function KanbanColumn({
   onReject,
   onTaskClick,
   isDropDisabled = false,
-  isDragDisabled = false
+  isDragDisabled = false,
+  headerAction
 }: KanbanColumnProps) {
   const { setNodeRef } = useDroppable({
     id,
@@ -39,7 +41,10 @@ export function KanbanColumn({
     <div className="flex flex-col h-full min-w-[320px] w-full max-w-sm bg-muted/30 rounded-xl border">
       <div className="p-4 border-b bg-background/50 backdrop-blur-sm rounded-t-xl flex items-center justify-between sticky top-0 z-10">
         <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">{title}</h3>
-        <Badge variant="secondary" className="font-mono">{tasks.length}</Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="font-mono">{tasks.length}</Badge>
+          {headerAction}
+        </div>
       </div>
 
       <div ref={setNodeRef} className="flex-1 overflow-y-auto p-3 custom-scrollbar h-full min-h-[150px]">

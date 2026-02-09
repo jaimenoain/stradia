@@ -3,6 +3,7 @@
 import { MarketBoardTask } from '@/types'
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Check, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useSortable } from '@dnd-kit/sortable'
@@ -18,6 +19,7 @@ interface SmartCardProps {
 
 export function SmartCard({ task, onAccept, onReject, onTaskClick, disabled }: SmartCardProps) {
   const isGhost = task.is_ghost
+  const isLocal = !task.origin_template_task_id
 
   const {
     attributes,
@@ -47,12 +49,18 @@ export function SmartCard({ task, onAccept, onReject, onTaskClick, disabled }: S
           isGhost
             ? 'opacity-60 border-dashed border-primary/50 bg-background/50 hover:opacity-100 hover:border-primary'
             : 'shadow-sm hover:shadow-md bg-card',
+          isLocal && !isGhost && 'border-l-4 border-l-blue-500',
           isDragging && 'ring-2 ring-primary ring-offset-2 z-50'
         )}
       >
         <CardHeader className="p-4 pb-2">
           <div className="flex justify-between items-start gap-2">
             <CardTitle className="text-base font-medium leading-tight">{task.title}</CardTitle>
+            {isLocal && (
+              <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200 text-[10px] px-1 py-0 h-5 shrink-0">
+                Local
+              </Badge>
+            )}
           </div>
         </CardHeader>
         <CardContent className="p-4 pt-0">
