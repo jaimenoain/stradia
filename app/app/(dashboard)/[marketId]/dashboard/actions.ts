@@ -165,3 +165,32 @@ export async function createLocalTask(
 
   return data
 }
+
+export async function updateTaskExecutionNotes(marketId: string, taskId: string, notes: string) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('Unauthorized')
+  }
+
+  const { data, error } = await supabase
+    .from('market_tasks')
+    .update({ execution_notes: notes })
+    .eq('id', taskId)
+    .eq('market_id', marketId)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error updating task execution notes:', error)
+    throw new Error('Failed to update task execution notes')
+  }
+
+  revalidatePath(`/app/${marketId}/dashboard`)
+
+  return data
+}

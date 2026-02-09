@@ -297,7 +297,7 @@ export function MarketBoard({ marketId }: MarketBoardProps) {
       <DragOverlay>
         {activeTask ? <SmartCard task={activeTask} /> : null}
       </DragOverlay>
-      <TaskDetailSheet tasks={safeTasks} />
+      <TaskDetailSheet tasks={safeTasks} marketId={marketId} />
     </DndContext>
   )
 }
