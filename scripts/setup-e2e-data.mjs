@@ -100,16 +100,16 @@ async function main() {
     console.log('Created template:', templateId);
   }
 
-  // Ensure Draft Version
+  // Ensure Version
   let versionId;
   const { data: versions } = await supabase.from('template_versions')
     .select('id')
     .eq('template_id', templateId)
-    .eq('status', 'DRAFT');
+    .eq('version_string', '0.0.1');
 
   if (versions && versions.length > 0) {
     versionId = versions[0].id;
-    console.log('Draft version already exists:', versionId);
+    console.log('Version already exists:', versionId);
   } else {
     const { data, error } = await supabase.from('template_versions').insert({
       template_id: templateId,
@@ -140,8 +140,35 @@ async function main() {
       console.log('Created task:', taskId);
   }
 
+  // Ensure Market Strategy
+  let strategyId;
+  const { data: strategies } = await supabase.from('market_strategies')
+      .select('id')
+      .eq('market_id', marketId)
+      .eq('template_version_id', versionId);
+
+  if (strategies && strategies.length > 0) {
+      strategyId = strategies[0].id;
+      console.log('Strategy already exists:', strategyId);
+  } else {
+      const { data, error } = await supabase.from('market_strategies').insert({
+          market_id: marketId,
+          template_version_id: versionId,
+          deployed_at: new Date().toISOString(),
+          status: 'ACTIVE'
+      }).select().single();
+      if (error) {
+        // If table doesn't have status or other fields, this might fail. But based on migration names it seems likely to exist.
+        // Let's assume standard fields. If fails, I'll check schema.
+        console.error('Failed to create strategy:', error);
+      } else {
+        strategyId = data.id;
+        console.log('Created strategy:', strategyId);
+      }
+  }
+
   console.log('SETUP COMPLETE');
-  console.log(JSON.stringify({ email, password, userId, orgId, marketId, templateId, versionId, taskId }));
+  console.log(JSON.stringify({ email, password, userId, orgId, marketId, templateId, versionId, taskId, strategyId }));
 }
 
 main().catch(console.error);

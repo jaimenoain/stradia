@@ -12,6 +12,7 @@ interface KanbanColumnProps {
   tasks: MarketBoardTask[]
   onAccept?: (task: MarketBoardTask) => void
   onReject?: (task: MarketBoardTask) => void
+  onTaskClick?: (taskId: string) => void
   isDropDisabled?: boolean
   isDragDisabled?: boolean
 }
@@ -22,6 +23,7 @@ export function KanbanColumn({
   tasks,
   onAccept,
   onReject,
+  onTaskClick,
   isDropDisabled = false,
   isDragDisabled = false
 }: KanbanColumnProps) {
@@ -48,6 +50,7 @@ export function KanbanColumn({
               task={task}
               onAccept={onAccept}
               onReject={onReject}
+              onTaskClick={onTaskClick}
               disabled={isDragDisabled}
             />
           ))
@@ -63,6 +66,7 @@ export function KanbanColumn({
                   task={task}
                   onAccept={onAccept}
                   onReject={onReject}
+                  onTaskClick={onTaskClick}
                   disabled={isDragDisabled}
                 />
               ))}
