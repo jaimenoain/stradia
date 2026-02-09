@@ -79,4 +79,18 @@ describe('VaultCard', () => {
     expect(screen.getByRole('button', { name: /^Connect$/i })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Connect GTM/i })).not.toBeInTheDocument()
   })
+
+  it('handles null supabase client gracefully', async () => {
+    (createClient as jest.Mock).mockReturnValue(null)
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+
+    render(<VaultCard provider="GTM" isConnected={false} marketId="market-123" />)
+    const button = screen.getByRole('button', { name: /Connect GTM/i })
+    fireEvent.click(button)
+
+    expect(mockSignInWithOAuth).not.toHaveBeenCalled()
+    expect(consoleSpy).toHaveBeenCalledWith('Supabase client not initialized')
+
+    consoleSpy.mockRestore()
+  })
 })
