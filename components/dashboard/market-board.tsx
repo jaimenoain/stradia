@@ -45,10 +45,12 @@ export function MarketBoard({ marketId }: MarketBoardProps) {
   const { data: tasks, isLoading, error } = useQuery({
     queryKey: ['market-board', marketId],
     queryFn: async () => {
+      if (!supabase) return []
       const { data, error } = await supabase.rpc('get_market_board', { target_market_id: marketId })
       if (error) throw error
       return (data || []) as MarketBoardTask[]
     },
+    enabled: !!supabase,
   })
 
   const { mutate: accept } = useMutation({
