@@ -67,7 +67,7 @@ export async function rejectTask(marketId: string, originTemplateTaskId: string)
   return data
 }
 
-export async function updateTaskStatus(marketId: string, taskId: string, newStatus: string) {
+export async function updateTaskStatus(marketId: string, taskId: string, newStatus: string, completionSummary?: string) {
   const supabase = await createClient()
 
   const {
@@ -88,6 +88,7 @@ export async function updateTaskStatus(marketId: string, taskId: string, newStat
     const { data: task, error: fetchError } = await supabase
       .from('market_tasks')
       .select(`
+        status,
         origin_template_task_id,
         task_type,
         template_tasks (
@@ -102,11 +103,34 @@ export async function updateTaskStatus(marketId: string, taskId: string, newStat
       throw new Error('Task not found')
     }
 
-    // @ts-ignore
+    // @ts-expect-error: Suppressing type check for template_tasks property access on possibly incomplete type
     const taskType = task.template_tasks?.task_type || task.task_type
 
     if (taskType === 'B' || taskType === 'C') {
       throw new Error('Type B and C tasks cannot be manually moved to DONE')
+    }
+
+    if (taskType === 'A' && !completionSummary) {
+      throw new Error('Completion summary is required for Type A tasks')
+    }
+
+    if (taskType === 'A' && completionSummary) {
+      const { error: logError } = await supabase
+        .from('task_activity_logs')
+        .insert({
+          market_task_id: taskId,
+          user_id: user.id,
+          action_type: 'COMPLETION',
+          previous_status: task.status,
+          new_status: newStatus,
+          metadata: { summary: completionSummary },
+        })
+
+      if (logError) {
+        console.error('Error logging completion:', logError)
+        // Consider whether to block update if log fails. For integrity, we should.
+        throw new Error('Failed to log completion')
+      }
     }
   }
 

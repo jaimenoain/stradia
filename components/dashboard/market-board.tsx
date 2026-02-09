@@ -25,6 +25,7 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { SmartCard } from './smart-card'
 import { CreateTaskDialog } from './create-task-dialog'
 import { Button } from '@/components/ui/button'
+import { CompletionModal } from './completion-modal'
 
 interface MarketBoardProps {
   marketId: string
@@ -34,6 +35,8 @@ export function MarketBoard({ marketId }: MarketBoardProps) {
   const supabase = createClient()
   const queryClient = useQueryClient()
   const [activeTask, setActiveTask] = useState<MarketBoardTask | null>(null)
+  const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false)
+  const [pendingTaskMove, setPendingTaskMove] = useState<{ taskId: string; newStatus: string } | null>(null)
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -126,8 +129,8 @@ export function MarketBoard({ marketId }: MarketBoardProps) {
   })
 
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ taskId, newStatus }: { taskId: string; newStatus: string }) => {
-      await updateTaskStatus(marketId, taskId, newStatus)
+    mutationFn: async ({ taskId, newStatus, completionSummary }: { taskId: string; newStatus: string, completionSummary?: string }) => {
+      await updateTaskStatus(marketId, taskId, newStatus, completionSummary)
     },
     onMutate: async ({ taskId, newStatus }) => {
       await queryClient.cancelQueries({ queryKey: ['market-board', marketId] })
@@ -189,12 +192,35 @@ export function MarketBoard({ marketId }: MarketBoardProps) {
         // Optimistic UI rollback will happen automatically since we don't mutate if we return here
         return
       }
+
+      if (type === 'A') {
+        setPendingTaskMove({ taskId, newStatus })
+        setIsCompletionModalOpen(true)
+        return
+      }
     }
 
     // Drifted check
     if (newStatus === 'DRIFTED') return
 
     updateStatusMutation.mutate({ taskId, newStatus })
+  }
+
+  function handleConfirmCompletion(summary: string) {
+    if (pendingTaskMove) {
+      updateStatusMutation.mutate({
+        taskId: pendingTaskMove.taskId,
+        newStatus: pendingTaskMove.newStatus,
+        completionSummary: summary
+      })
+      setIsCompletionModalOpen(false)
+      setPendingTaskMove(null)
+    }
+  }
+
+  function handleCancelCompletion() {
+    setIsCompletionModalOpen(false)
+    setPendingTaskMove(null)
   }
 
   function handleTaskClick(taskId: string) {
@@ -298,6 +324,12 @@ export function MarketBoard({ marketId }: MarketBoardProps) {
         {activeTask ? <SmartCard task={activeTask} /> : null}
       </DragOverlay>
       <TaskDetailSheet tasks={safeTasks} />
+      <CompletionModal
+        isOpen={isCompletionModalOpen}
+        onOpenChange={setIsCompletionModalOpen}
+        onConfirm={handleConfirmCompletion}
+        onCancel={handleCancelCompletion}
+      />
     </DndContext>
   )
 }
