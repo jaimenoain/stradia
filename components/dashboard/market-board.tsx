@@ -5,9 +5,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import { KanbanColumn } from './kanban-column'
 import { EmptyState } from './empty-state'
+import { TaskDetailSheet } from './task-detail-sheet'
 import { acceptTask, rejectTask, updateTaskStatus } from '@/app/app/(dashboard)/[marketId]/dashboard/actions'
 import { MarketBoardTask } from '@/types'
 import { Loader2 } from 'lucide-react'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import {
   DndContext,
   DragOverlay,
@@ -30,6 +32,9 @@ export function MarketBoard({ marketId }: MarketBoardProps) {
   const supabase = createClient()
   const queryClient = useQueryClient()
   const [activeTask, setActiveTask] = useState<MarketBoardTask | null>(null)
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -44,7 +49,9 @@ export function MarketBoard({ marketId }: MarketBoardProps) {
 
   const { data: tasks, isLoading, error } = useQuery({
     queryKey: ['market-board', marketId],
+    enabled: !!supabase,
     queryFn: async () => {
+      if (!supabase) return []
       const { data, error } = await supabase.rpc('get_market_board', { target_market_id: marketId })
       if (error) throw error
       return (data || []) as MarketBoardTask[]
@@ -182,6 +189,12 @@ export function MarketBoard({ marketId }: MarketBoardProps) {
     updateStatusMutation.mutate({ taskId, newStatus })
   }
 
+  function handleTaskClick(taskId: string) {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('taskId', taskId)
+    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full w-full min-h-[400px]">
@@ -234,21 +247,39 @@ export function MarketBoard({ marketId }: MarketBoardProps) {
           tasks={todoTasks}
           onAccept={(task) => accept(task)}
           onReject={(task) => reject(task)}
+          onTaskClick={handleTaskClick}
         />
-        <KanbanColumn id="IN_PROGRESS" title="In Progress" tasks={inProgressTasks} />
-        <KanbanColumn id="REVIEW" title="Review" tasks={reviewTasks} />
-        <KanbanColumn id="DONE" title="Done" tasks={doneTasks} />
+        <KanbanColumn
+          id="IN_PROGRESS"
+          title="In Progress"
+          tasks={inProgressTasks}
+          onTaskClick={handleTaskClick}
+        />
+        <KanbanColumn
+          id="REVIEW"
+          title="Review"
+          tasks={reviewTasks}
+          onTaskClick={handleTaskClick}
+        />
+        <KanbanColumn
+          id="DONE"
+          title="Done"
+          tasks={doneTasks}
+          onTaskClick={handleTaskClick}
+        />
         <KanbanColumn
           id="DRIFTED"
           title="Drifted"
           tasks={driftedTasks}
           isDropDisabled={true}
           isDragDisabled={true}
+          onTaskClick={handleTaskClick}
         />
       </div>
       <DragOverlay>
         {activeTask ? <SmartCard task={activeTask} /> : null}
       </DragOverlay>
+      <TaskDetailSheet tasks={safeTasks} />
     </DndContext>
   )
 }

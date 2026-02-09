@@ -12,10 +12,11 @@ interface SmartCardProps {
   task: MarketBoardTask
   onAccept?: (task: MarketBoardTask) => void
   onReject?: (task: MarketBoardTask) => void
+  onTaskClick?: (taskId: string) => void
   disabled?: boolean
 }
 
-export function SmartCard({ task, onAccept, onReject, disabled }: SmartCardProps) {
+export function SmartCard({ task, onAccept, onReject, onTaskClick, disabled }: SmartCardProps) {
   const isGhost = task.is_ghost
 
   const {
@@ -40,8 +41,9 @@ export function SmartCard({ task, onAccept, onReject, disabled }: SmartCardProps
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="touch-none">
       <Card
+        onClick={() => onTaskClick?.(task.id)}
         className={cn(
-          'w-full transition-all duration-200 mb-3 break-inside-avoid',
+          'w-full transition-all duration-200 mb-3 break-inside-avoid cursor-pointer',
           isGhost
             ? 'opacity-60 border-dashed border-primary/50 bg-background/50 hover:opacity-100 hover:border-primary'
             : 'shadow-sm hover:shadow-md bg-card',

@@ -50,4 +50,12 @@ describe('SmartCard Component', () => {
     fireEvent.click(screen.getByTitle('Reject Task'))
     expect(onReject).toHaveBeenCalledWith(mockGhostTask)
   })
+
+  it('calls onTaskClick when clicked', () => {
+    const onTaskClick = jest.fn()
+    render(<SmartCard task={mockTask} onTaskClick={onTaskClick} />)
+
+    fireEvent.click(screen.getByText('Test Task'))
+    expect(onTaskClick).toHaveBeenCalledWith(mockTask.id)
+  })
 })

@@ -5,6 +5,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { DndContext, useDroppable } from '@dnd-kit/core'
 import { useSortable } from '@dnd-kit/sortable'
 
+// Mock next/navigation
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+  }),
+  usePathname: () => '/app/test-market/dashboard',
+  useSearchParams: () => new URLSearchParams(),
+}))
+
 // Mock dependencies
 jest.mock('@tanstack/react-query', () => ({
   ...jest.requireActual('@tanstack/react-query'),
