@@ -8,7 +8,7 @@ import { EmptyState } from './empty-state'
 import { TaskDetailSheet } from './task-detail-sheet'
 import { acceptTask, rejectTask, updateTaskStatus } from '@/app/app/(dashboard)/[marketId]/dashboard/actions'
 import { MarketBoardTask } from '@/types'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Plus } from 'lucide-react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import {
   DndContext,
@@ -23,6 +23,8 @@ import {
 } from '@dnd-kit/core'
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { SmartCard } from './smart-card'
+import { CreateTaskDialog } from './create-task-dialog'
+import { Button } from '@/components/ui/button'
 
 interface MarketBoardProps {
   marketId: string
@@ -255,6 +257,16 @@ export function MarketBoard({ marketId }: MarketBoardProps) {
           onAccept={(task) => accept(task)}
           onReject={(task) => reject(task)}
           onTaskClick={handleTaskClick}
+          headerAction={
+            <CreateTaskDialog
+              marketId={marketId}
+              trigger={
+                <Button variant="ghost" size="icon" className="h-6 w-6">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              }
+            />
+          }
         />
         <KanbanColumn
           id="IN_PROGRESS"
