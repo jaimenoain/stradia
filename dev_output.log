@@ -13,4 +13,7 @@ You can learn more, including how to opt-out if you'd not like to participate in
 https://nextjs.org/telemetry
 
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-✓ Ready in 1738ms
+✓ Ready in 1716ms
+Supabase environment variables are missing. Middleware is skipping authentication checks.
+○ Compiling /test-wizard ...
+ GET /test-wizard 200 in 5.5s (compile: 5.0s, proxy.ts: 187ms, render: 370ms)
