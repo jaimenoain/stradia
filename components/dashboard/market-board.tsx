@@ -61,6 +61,9 @@ export function MarketBoard({ marketId }: MarketBoardProps) {
 
   const { mutate: accept } = useMutation({
     mutationFn: async (task: MarketBoardTask) => {
+      if (!task.origin_template_task_id) {
+        throw new Error('Cannot accept a task without origin template')
+      }
       await acceptTask(marketId, task.origin_template_task_id)
     },
     onMutate: async (newTask) => {
@@ -93,6 +96,9 @@ export function MarketBoard({ marketId }: MarketBoardProps) {
 
   const { mutate: reject } = useMutation({
     mutationFn: async (task: MarketBoardTask) => {
+      if (!task.origin_template_task_id) {
+        throw new Error('Cannot reject a task without origin template')
+      }
       await rejectTask(marketId, task.origin_template_task_id)
     },
     onMutate: async (deltedTask) => {
