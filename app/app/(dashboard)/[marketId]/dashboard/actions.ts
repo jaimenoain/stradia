@@ -35,6 +35,44 @@ export async function acceptTask(marketId: string, originTemplateTaskId: string)
   return data
 }
 
+export async function updateTaskExecutionNotes(
+  marketId: string,
+  taskId: string,
+  notes: string
+) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('Unauthorized')
+  }
+
+  // Prevent updates to Ghost tasks (temp_ IDs)
+  if (taskId.startsWith('temp_')) {
+    throw new Error('Please accept the task before adding notes.')
+  }
+
+  const { data, error } = await supabase
+    .from('market_tasks')
+    .update({ execution_notes: notes })
+    .eq('id', taskId)
+    .eq('market_id', marketId)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error updating execution notes:', error)
+    throw new Error('Failed to update execution notes')
+  }
+
+  revalidatePath(`/app/${marketId}/dashboard`)
+
+  return data
+}
+
 export async function rejectTask(marketId: string, originTemplateTaskId: string) {
   const supabase = await createClient()
 

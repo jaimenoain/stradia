@@ -49,4 +49,5 @@ export interface MarketBoardTask {
   weight: number
   is_optional: boolean
   task_config: Record<string, any>
+  execution_notes: string | null
 }
