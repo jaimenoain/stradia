@@ -13,14 +13,17 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { useSearchParams, usePathname, useRouter } from 'next/navigation'
-import { BookOpen, Activity, Settings, AlertCircle } from 'lucide-react'
+import { BookOpen, Activity, Settings, AlertCircle, FileText, CheckCircle2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
+import { updateTaskExecutionNotes } from '@/app/app/(dashboard)/[marketId]/dashboard/actions'
 
 interface TaskDetailSheetProps {
   tasks: MarketBoardTask[]
+  marketId: string
 }
 
-export function TaskDetailSheet({ tasks }: TaskDetailSheetProps) {
+export function TaskDetailSheet({ tasks, marketId }: TaskDetailSheetProps) {
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
@@ -37,14 +40,32 @@ export function TaskDetailSheet({ tasks }: TaskDetailSheetProps) {
   const isOpen = !!taskId && !!task
 
   // Tab state
-  const [activeTab, setActiveTab] = React.useState<'guide' | 'activity' | 'config'>('guide')
+  const [activeTab, setActiveTab] = React.useState<'guide' | 'notes' | 'activity' | 'config'>('guide')
+  const [notes, setNotes] = React.useState('')
+  const [isSaving, setIsSaving] = React.useState(false)
 
-  // Reset tab when task changes
+  // Reset tab and notes when task changes
   React.useEffect(() => {
     if (taskId) {
       setActiveTab('guide')
     }
-  }, [taskId])
+    if (task) {
+      setNotes(task.execution_notes || '')
+    }
+  }, [taskId, task])
+
+  async function handleSaveNotes() {
+    if (!task || !marketId) return
+
+    setIsSaving(true)
+    try {
+      await updateTaskExecutionNotes(marketId, task.id, notes)
+    } catch (error) {
+      console.error('Failed to save notes:', error)
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   function handleClose() {
     const params = new URLSearchParams(searchParams.toString())
@@ -97,6 +118,17 @@ export function TaskDetailSheet({ tasks }: TaskDetailSheetProps) {
               <BookOpen className="w-3.5 h-3.5 mr-2" />
               Guide
             </Button>
+            {task.task_type === 'A' && (
+              <Button
+                variant={activeTab === 'notes' ? 'secondary' : 'ghost'}
+                size="sm"
+                className="flex-1 h-8 text-xs font-medium"
+                onClick={() => setActiveTab('notes')}
+              >
+                <FileText className="w-3.5 h-3.5 mr-2" />
+                Notes
+              </Button>
+            )}
             <Button
               variant={activeTab === 'activity' ? 'secondary' : 'ghost'}
               size="sm"
@@ -130,6 +162,27 @@ export function TaskDetailSheet({ tasks }: TaskDetailSheetProps) {
                     <p className="text-muted-foreground italic">No description provided for this task.</p>
                   )}
                 </div>
+              </div>
+            )}
+
+            {activeTab === 'notes' && (
+              <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="flex items-center justify-between mb-2">
+                   <h3 className="text-sm font-medium">Execution Notes</h3>
+                   {isSaving ? (
+                     <span className="text-xs text-muted-foreground animate-pulse">Saving...</span>
+                   ) : (
+                     <div className="flex items-center text-xs text-muted-foreground">
+                        <CheckCircle2 className="w-3 h-3 mr-1" />
+                        Saved
+                     </div>
+                   )}
+                </div>
+                <RichTextEditor
+                  value={notes}
+                  onChange={setNotes}
+                  onBlur={handleSaveNotes}
+                />
               </div>
             )}
 
