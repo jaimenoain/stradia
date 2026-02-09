@@ -89,6 +89,7 @@ export async function updateTaskStatus(marketId: string, taskId: string, newStat
       .from('market_tasks')
       .select(`
         origin_template_task_id,
+        task_type,
         template_tasks (
           task_type
         )
@@ -102,7 +103,7 @@ export async function updateTaskStatus(marketId: string, taskId: string, newStat
     }
 
     // @ts-ignore
-    const taskType = task.template_tasks?.task_type
+    const taskType = task.template_tasks?.task_type || task.task_type
 
     if (taskType === 'B' || taskType === 'C') {
       throw new Error('Type B and C tasks cannot be manually moved to DONE')
@@ -120,6 +121,44 @@ export async function updateTaskStatus(marketId: string, taskId: string, newStat
   if (error) {
     console.error('Error updating task status:', error)
     throw new Error('Failed to update task status')
+  }
+
+  revalidatePath(`/app/${marketId}/dashboard`)
+
+  return data
+}
+
+export async function createLocalTask(
+  marketId: string,
+  title: string,
+  description: string | null = null
+) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error('Unauthorized')
+  }
+
+  const { data, error } = await supabase
+    .from('market_tasks')
+    .insert({
+      market_id: marketId,
+      title,
+      description,
+      status: 'TODO',
+      task_type: 'A',
+      origin_template_task_id: null,
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error creating local task:', error)
+    throw new Error('Failed to create local task')
   }
 
   revalidatePath(`/app/${marketId}/dashboard`)

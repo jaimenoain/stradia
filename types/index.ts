@@ -45,7 +45,7 @@ export interface MarketBoardTask {
   title: string
   description: string | null
   task_type: 'A' | 'B' | 'C'
-  origin_template_task_id: string
+  origin_template_task_id: string | null
   weight: number
   is_optional: boolean
   task_config: Record<string, any>
