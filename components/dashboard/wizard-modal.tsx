@@ -32,6 +32,7 @@ export interface TaskConfig {
 interface WizardModalProps {
   isOpen: boolean
   onClose: () => void
+  taskId: string
   taskConfig: TaskConfig
   taskType: 'B' | 'C'
   onComplete: (data: { inputs: Record<string, any>; generatedCode: string }) => void
@@ -40,6 +41,7 @@ interface WizardModalProps {
 export function WizardModal({
   isOpen,
   onClose,
+  taskId,
   taskConfig,
   taskType,
   onComplete,

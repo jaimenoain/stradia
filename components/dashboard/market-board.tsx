@@ -26,6 +26,7 @@ import { SmartCard } from './smart-card'
 import { CreateTaskDialog } from './create-task-dialog'
 import { Button } from '@/components/ui/button'
 import { CompletionModal } from './completion-modal'
+import { WizardModal, TaskConfig } from './wizard-modal'
 
 interface MarketBoardProps {
   marketId: string
@@ -37,6 +38,8 @@ export function MarketBoard({ marketId }: MarketBoardProps) {
   const [activeTask, setActiveTask] = useState<MarketBoardTask | null>(null)
   const [isCompletionModalOpen, setIsCompletionModalOpen] = useState(false)
   const [pendingTaskMove, setPendingTaskMove] = useState<{ taskId: string; newStatus: string } | null>(null)
+  const [wizardTask, setWizardTask] = useState<MarketBoardTask | null>(null)
+  const [isWizardOpen, setIsWizardOpen] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -224,6 +227,15 @@ export function MarketBoard({ marketId }: MarketBoardProps) {
   }
 
   function handleTaskClick(taskId: string) {
+    const task = tasks?.find((t) => t.id === taskId)
+    if (!task) return
+
+    if (task.task_type === 'B' || task.task_type === 'C') {
+      setWizardTask(task)
+      setIsWizardOpen(true)
+      return
+    }
+
     const params = new URLSearchParams(searchParams.toString())
     params.set('taskId', taskId)
     router.push(`${pathname}?${params.toString()}`, { scroll: false })
@@ -330,6 +342,16 @@ export function MarketBoard({ marketId }: MarketBoardProps) {
         onConfirm={handleConfirmCompletion}
         onCancel={handleCancelCompletion}
       />
+      {wizardTask && (
+        <WizardModal
+          isOpen={isWizardOpen}
+          onClose={() => setIsWizardOpen(false)}
+          taskId={wizardTask.id}
+          taskConfig={wizardTask.task_config as TaskConfig}
+          taskType={wizardTask.task_type as 'B' | 'C'}
+          onComplete={() => setIsWizardOpen(false)}
+        />
+      )}
     </DndContext>
   )
 }
