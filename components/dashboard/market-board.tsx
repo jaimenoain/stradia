@@ -349,7 +349,10 @@ export function MarketBoard({ marketId }: MarketBoardProps) {
           taskId={wizardTask.id}
           taskConfig={wizardTask.task_config as TaskConfig}
           taskType={wizardTask.task_type as 'B' | 'C'}
-          onComplete={() => setIsWizardOpen(false)}
+          onComplete={() => {
+            setIsWizardOpen(false)
+            queryClient.invalidateQueries({ queryKey: ['market-board', marketId] })
+          }}
         />
       )}
     </DndContext>

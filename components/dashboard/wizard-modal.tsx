@@ -15,6 +15,9 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2 } from 'lucide-react'
 import Editor from '@monaco-editor/react'
+import { toast } from 'sonner'
+import confetti from 'canvas-confetti'
+import { createClient } from '@/lib/supabase/client'
 
 export interface TaskConfigInput {
   name: string
@@ -50,6 +53,7 @@ export function WizardModal({
   const [formData, setFormData] = React.useState<Record<string, any>>({})
   const [generatedCode, setGeneratedCode] = React.useState('')
   const [isGenerating, setIsGenerating] = React.useState(false)
+  const [isExecuting, setIsExecuting] = React.useState(false)
 
   // Reset state when modal opens
   React.useEffect(() => {
@@ -58,6 +62,7 @@ export function WizardModal({
       setFormData({})
       setGeneratedCode('')
       setIsGenerating(false)
+      setIsExecuting(false)
     }
   }, [isOpen])
 
@@ -76,29 +81,18 @@ export function WizardModal({
     // Simulate API call
     setTimeout(() => {
       setIsGenerating(false)
-      const mockCode = `// Generated code for ${taskType === 'B' ? 'Generative' : 'Executive'} task
-// Inputs: ${JSON.stringify(formData, null, 2)}
-
-/**
- * Validates the input parameters.
- */
-function validate() {
-  console.log("Validating inputs...");
-  return true;
-}
-
-/**
- * Executes the main logic.
- */
-async function execute() {
-  console.log("Executing task logic...");
-  // TODO: Implement actual logic here
-  return "Success";
-}
-
-execute();
-`
-      setGeneratedCode(mockCode)
+      const mockPayload = {
+        name: formData.name || 'Generated Tag',
+        type: 'html',
+        parameter: [
+          {
+            key: 'html',
+            value: '<script>console.log("Hello World");</script>',
+          },
+        ],
+        ...formData,
+      }
+      setGeneratedCode(JSON.stringify(mockPayload, null, 2))
       setStep(3)
     }, 2000)
   }
@@ -107,9 +101,47 @@ execute();
     startGeneration()
   }
 
-  const handleApprove = () => {
-    onComplete({ inputs: formData, generatedCode })
-    onClose()
+  const handleApprove = async () => {
+    if (taskType === 'C') {
+      setIsExecuting(true)
+      try {
+        const supabase = createClient()
+        let payload
+        try {
+          payload = JSON.parse(generatedCode)
+        } catch (e) {
+          console.error('Failed to parse generated code', e)
+          toast.error('Invalid JSON format in generated code')
+          setIsExecuting(false)
+          return
+        }
+
+        const { data, error } = await supabase.functions.invoke('execute-action', {
+          body: { taskId, payload },
+        })
+
+        if (error || (data && data.error)) {
+          const msg = error?.message || data?.error || 'Unknown error'
+          toast.error(`Execution failed: ${msg}`)
+        } else {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+          })
+          toast.success('Task executed successfully!')
+          onComplete({ inputs: formData, generatedCode })
+        }
+      } catch (err: any) {
+        toast.error(`An unexpected error occurred: ${err.message}`)
+      } finally {
+        setIsExecuting(false)
+      }
+    } else {
+      // Type B
+      onComplete({ inputs: formData, generatedCode })
+      onClose()
+    }
   }
 
   // If no inputs are configured, we can skip step 1 or just show a "Generate" button.
@@ -182,7 +214,7 @@ execute();
             <div className="border rounded-md overflow-hidden h-full min-h-[400px]">
               <Editor
                 height="100%"
-                defaultLanguage="javascript"
+                defaultLanguage="json"
                 value={generatedCode}
                 theme="vs-dark"
                 options={{
@@ -210,10 +242,11 @@ execute();
           )}
           {step === 3 && (
             <div className="flex w-full justify-between sm:justify-end gap-2">
-              <Button variant="secondary" onClick={handleRegenerate}>
+              <Button variant="secondary" onClick={handleRegenerate} disabled={isExecuting}>
                 Regenerate
               </Button>
-              <Button onClick={handleApprove}>
+              <Button onClick={handleApprove} disabled={isExecuting}>
+                {isExecuting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {taskType === 'B' ? 'Approve & Save' : 'Approve & Execute'}
               </Button>
             </div>

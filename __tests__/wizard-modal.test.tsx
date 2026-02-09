@@ -23,6 +23,25 @@ jest.mock('lucide-react', () => ({
   XIcon: () => <div data-testid="close-icon" />,
 }))
 
+// Mock Sonner and Confetti
+jest.mock('sonner', () => ({
+  toast: {
+    success: jest.fn(),
+    error: jest.fn(),
+  },
+}))
+
+jest.mock('canvas-confetti', () => jest.fn())
+
+// Mock Supabase Client
+jest.mock('@/lib/supabase/client', () => ({
+  createClient: jest.fn(),
+}))
+
+import { createClient } from '@/lib/supabase/client'
+const mockCreateClient = createClient as jest.Mock
+const mockInvoke = jest.fn()
+
 // Mock ResizeObserver for Radix UI
 global.ResizeObserver = class ResizeObserver {
   observe() {}
@@ -98,6 +117,12 @@ describe('WizardModal', () => {
   })
 
   it('calls onComplete with correct data on approval', async () => {
+    mockInvoke.mockResolvedValue({ data: { success: true }, error: null })
+    mockCreateClient.mockReturnValue({
+      functions: {
+        invoke: mockInvoke,
+      },
+    })
     render(<WizardModal {...defaultProps} />)
 
     // Step 1
@@ -118,10 +143,16 @@ describe('WizardModal', () => {
     // Step 3
     fireEvent.click(screen.getByText('Approve & Execute'))
 
-    expect(mockOnComplete).toHaveBeenCalledWith(expect.objectContaining({
-      inputs: { test_input: 'my-input-value' },
-      generatedCode: expect.stringContaining('// Generated code for Executive task'),
-    }))
+    await waitFor(() => {
+      expect(mockInvoke).toHaveBeenCalled()
+    })
+
+    await waitFor(() => {
+      expect(mockOnComplete).toHaveBeenCalledWith(expect.objectContaining({
+        inputs: { test_input: 'my-input-value' },
+        generatedCode: expect.stringContaining('"test_input": "my-input-value"'),
+      }))
+    })
   })
 
   it('shows "Approve & Save" for Type B tasks', async () => {
