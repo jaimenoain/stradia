@@ -12,9 +12,11 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { useSearchParams, usePathname, useRouter } from 'next/navigation'
-import { BookOpen, Activity, Settings, AlertCircle } from 'lucide-react'
+import { useSearchParams, usePathname, useRouter, useParams } from 'next/navigation'
+import { BookOpen, Activity, Settings, AlertCircle, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
+import { updateTaskExecutionNotes } from '@/app/app/(dashboard)/[marketId]/dashboard/actions'
 
 interface TaskDetailSheetProps {
   tasks: MarketBoardTask[]
@@ -24,6 +26,8 @@ export function TaskDetailSheet({ tasks }: TaskDetailSheetProps) {
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
+  const params = useParams()
+  const marketId = params.marketId as string
 
   // Get taskId from URL
   const taskId = searchParams.get('taskId')
@@ -37,19 +41,42 @@ export function TaskDetailSheet({ tasks }: TaskDetailSheetProps) {
   const isOpen = !!taskId && !!task
 
   // Tab state
-  const [activeTab, setActiveTab] = React.useState<'guide' | 'activity' | 'config'>('guide')
+  const [activeTab, setActiveTab] = React.useState<'guide' | 'activity' | 'config' | 'notes'>('guide')
+  const [notes, setNotes] = React.useState('')
 
-  // Reset tab when task changes
+  // Reset tab when task changes and sync notes
   React.useEffect(() => {
     if (taskId) {
       setActiveTab('guide')
     }
   }, [taskId])
 
+  React.useEffect(() => {
+    if (task) {
+      setNotes(task.execution_notes || '')
+    }
+  }, [task])
+
   function handleClose() {
     const params = new URLSearchParams(searchParams.toString())
     params.delete('taskId')
     router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+  }
+
+  const handleNotesBlur = async () => {
+    if (!task || !marketId) return
+    if (task.id.startsWith('temp_')) return
+
+    // Only update if changed?
+    // Ideally yes, but for now simple call
+    if (notes !== task.execution_notes) {
+        try {
+            await updateTaskExecutionNotes(marketId, task.id, notes)
+        } catch (error) {
+            console.error('Failed to save notes', error)
+            // Optionally show toast
+        }
+    }
   }
 
   if (!task) return null
@@ -97,6 +124,19 @@ export function TaskDetailSheet({ tasks }: TaskDetailSheetProps) {
               <BookOpen className="w-3.5 h-3.5 mr-2" />
               Guide
             </Button>
+
+            {task.task_type === 'A' && (
+              <Button
+                variant={activeTab === 'notes' ? 'secondary' : 'ghost'}
+                size="sm"
+                className="flex-1 h-8 text-xs font-medium"
+                onClick={() => setActiveTab('notes')}
+              >
+                <FileText className="w-3.5 h-3.5 mr-2" />
+                Notes
+              </Button>
+            )}
+
             <Button
               variant={activeTab === 'activity' ? 'secondary' : 'ghost'}
               size="sm"
@@ -130,6 +170,30 @@ export function TaskDetailSheet({ tasks }: TaskDetailSheetProps) {
                     <p className="text-muted-foreground italic">No description provided for this task.</p>
                   )}
                 </div>
+              </div>
+            )}
+
+            {activeTab === 'notes' && task.task_type === 'A' && (
+              <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="space-y-2">
+                   <h3 className="text-sm font-medium leading-none">Execution Notes</h3>
+                   <p className="text-xs text-muted-foreground">
+                     Document your progress, findings, and results here.
+                   </p>
+                </div>
+                <RichTextEditor
+                  value={notes}
+                  onChange={setNotes}
+                  onBlur={handleNotesBlur}
+                  disabled={task.id.startsWith('temp_')}
+                  className="min-h-[300px]"
+                />
+                {task.id.startsWith('temp_') && (
+                  <p className="text-xs text-amber-500 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    Accept this task to start adding notes.
+                  </p>
+                )}
               </div>
             )}
 
