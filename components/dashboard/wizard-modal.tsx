@@ -134,7 +134,7 @@ execute();
         <div className="flex-1 overflow-y-auto py-4">
           {step === 1 && (
             <form id="wizard-form" onSubmit={handleInputSubmit} className="space-y-4 px-1">
-              {taskConfig.inputs && taskConfig.inputs.length > 0 ? (
+              {taskConfig?.inputs && taskConfig.inputs.length > 0 ? (
                 taskConfig.inputs.map((input) => (
                   <div key={input.name} className="grid w-full items-center gap-1.5">
                     <Label htmlFor={input.name}>

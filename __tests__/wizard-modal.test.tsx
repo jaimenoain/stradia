@@ -5,7 +5,15 @@ import { WizardModal } from '@/components/dashboard/wizard-modal'
 // Mock Monaco Editor
 jest.mock('@monaco-editor/react', () => {
   return function MockEditor(props: any) {
-    return <div data-testid="monaco-editor" data-value={props.value}>Mock Editor</div>
+    return (
+      <div
+        data-testid="monaco-editor"
+        data-value={props.value}
+        data-readonly={props.options?.readOnly ? 'true' : 'false'}
+      >
+        Mock Editor
+      </div>
+    )
   }
 })
 
@@ -29,6 +37,7 @@ describe('WizardModal', () => {
   const defaultProps = {
     isOpen: true,
     onClose: mockOnClose,
+    taskId: 'task-123',
     taskConfig: {
       inputs: [
         { name: 'test_input', label: 'Test Input', type: 'text' as const, required: true },
@@ -47,13 +56,13 @@ describe('WizardModal', () => {
     jest.useRealTimers()
   })
 
-  it('renders step 1 (Input) initially', () => {
+  it('renders step 1 (Input) initially with dynamic inputs', () => {
     render(<WizardModal {...defaultProps} />)
     expect(screen.getByText('Configure Task')).toBeInTheDocument()
     expect(screen.getByLabelText(/Test Input/i)).toBeInTheDocument()
   })
 
-  it('transitions to step 2 (Loading) on submit', async () => {
+  it('transitions to step 2 (Loading) on submit and shows specific loading UI', async () => {
     render(<WizardModal {...defaultProps} />)
 
     fireEvent.change(screen.getByLabelText(/Test Input/i), {
@@ -66,7 +75,7 @@ describe('WizardModal', () => {
     expect(screen.getByTestId('loader-spinner')).toBeInTheDocument()
   })
 
-  it('transitions to step 3 (Review) after delay', async () => {
+  it('transitions to step 3 (Review) and editor is Read-Only', async () => {
     render(<WizardModal {...defaultProps} />)
 
     fireEvent.change(screen.getByLabelText(/Test Input/i), {
@@ -83,7 +92,9 @@ describe('WizardModal', () => {
       expect(screen.getByText('Review & Approve')).toBeInTheDocument()
     })
 
-    expect(screen.getByTestId('monaco-editor')).toBeInTheDocument()
+    const editor = screen.getByTestId('monaco-editor')
+    expect(editor).toBeInTheDocument()
+    expect(editor).toHaveAttribute('data-readonly', 'true')
   })
 
   it('calls onComplete with correct data on approval', async () => {
@@ -113,7 +124,7 @@ describe('WizardModal', () => {
     }))
   })
 
-  it('shows correct button label for Type B', async () => {
+  it('shows "Approve & Save" for Type B tasks', async () => {
     render(<WizardModal {...defaultProps} taskType="B" />)
 
     fireEvent.change(screen.getByLabelText(/Test Input/i), {
@@ -132,6 +143,13 @@ describe('WizardModal', () => {
 
   it('handles empty config correctly', () => {
     render(<WizardModal {...defaultProps} taskConfig={{ inputs: [] }} />)
+    expect(screen.getByText('No specific configuration is required for this task.')).toBeInTheDocument()
+    expect(screen.getByText('Generate')).toBeInTheDocument()
+  })
+
+  it('handles undefined taskConfig gracefully', () => {
+    // Suppress console.error if needed, or rely on optional chaining fix
+    render(<WizardModal {...defaultProps} taskConfig={undefined as any} />)
     expect(screen.getByText('No specific configuration is required for this task.')).toBeInTheDocument()
     expect(screen.getByText('Generate')).toBeInTheDocument()
   })
