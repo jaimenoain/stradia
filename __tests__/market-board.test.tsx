@@ -1,19 +1,22 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import { MarketBoard } from '@/components/dashboard/market-board'
 import { MarketBoardTask } from '@/types'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { DndContext, useDroppable } from '@dnd-kit/core'
 import { useSortable } from '@dnd-kit/sortable'
 
+const mockPush = jest.fn()
+
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: jest.fn(),
+    push: mockPush,
     replace: jest.fn(),
     prefetch: jest.fn(),
   }),
   usePathname: () => '/app/test-market/dashboard',
   useSearchParams: () => new URLSearchParams(),
+  useParams: () => ({ marketId: 'test-market' }),
 }))
 
 // Mock dependencies
@@ -55,6 +58,22 @@ jest.mock('@dnd-kit/sortable', () => ({
   SortableContext: jest.fn(({ children }) => <div data-testid="sortable-context">{children}</div>),
   sortableKeyboardCoordinates: jest.fn(),
   verticalListSortingStrategy: {},
+}))
+
+jest.mock('@/components/dashboard/wizard-modal', () => ({
+  WizardModal: jest.fn(({ isOpen }) => (
+    isOpen ? <div data-testid="wizard-modal">Wizard Modal Content</div> : null
+  )),
+}))
+
+jest.mock('@/components/dashboard/completion-modal', () => ({
+  CompletionModal: jest.fn(({ isOpen, onConfirm }) => (
+    isOpen ? (
+      <div data-testid="completion-modal">
+        <button onClick={() => onConfirm('Test Summary')}>Confirm Completion</button>
+      </div>
+    ) : null
+  )),
 }))
 
 // Helper to mock useQuery response
@@ -176,21 +195,32 @@ describe('MarketBoard Logic Verification', () => {
 
   it('Type A Validation: Allows dragging Type A task to DONE', () => {
     mockUseQuery(mockTasks)
-    render(<MarketBoard marketId="test-market" />)
+    const { getByText, getByTestId } = render(<MarketBoard marketId="test-market" />)
 
     // Simulate DragEnd
     const dndContextMock = (DndContext as unknown as jest.Mock)
     const onDragEnd = dndContextMock.mock.calls[dndContextMock.mock.calls.length - 1][0].onDragEnd
 
     // Trigger drop of Type A to DONE
-    onDragEnd({
-        active: { id: 'task-A' },
-        over: { id: 'DONE' }
+    act(() => {
+      onDragEnd({
+          active: { id: 'task-A' },
+          over: { id: 'DONE' }
+      })
     })
 
-    // Expect mutation to be called
+    // Expect mutation NOT to be called immediately (modal opens)
+    expect(mockMutate).not.toHaveBeenCalled()
+
+    // Check modal is open
+    expect(getByTestId('completion-modal')).toBeInTheDocument()
+
+    // Confirm
+    fireEvent.click(getByText('Confirm Completion'))
+
+    // Expect mutation to be called now
     expect(mockMutate).toHaveBeenCalledWith(
-        expect.objectContaining({ taskId: 'task-A', newStatus: 'DONE' })
+        expect.objectContaining({ taskId: 'task-A', newStatus: 'DONE', completionSummary: 'Test Summary' })
     )
   })
 
@@ -266,5 +296,31 @@ describe('MarketBoard Logic Verification', () => {
 
     expect(driftedColumnCall).toBeTruthy()
     expect(driftedColumnCall[0].disabled).toBe(true)
+  })
+
+  it('Opening Wizard: Clicking Type B task opens WizardModal', () => {
+    mockUseQuery(mockTasks)
+    const { getByText, getByTestId } = render(<MarketBoard marketId="test-market" />)
+
+    const taskB = getByText('Type B Task')
+    fireEvent.click(taskB)
+
+    expect(getByTestId('wizard-modal')).toBeInTheDocument()
+
+    // Check navigation was NOT triggered
+    expect(mockPush).not.toHaveBeenCalled()
+  })
+
+  it('Legacy Navigation: Clicking Type A task triggers navigation', () => {
+    mockUseQuery(mockTasks)
+    const { getByText, queryByTestId } = render(<MarketBoard marketId="test-market" />)
+
+    const taskA = getByText('Type A Task')
+    fireEvent.click(taskA)
+
+    expect(queryByTestId('wizard-modal')).not.toBeInTheDocument()
+
+    // Check navigation WAS triggered
+    expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('taskId=task-A'), expect.anything())
   })
 })
