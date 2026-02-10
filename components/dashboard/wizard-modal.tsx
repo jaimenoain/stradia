@@ -106,6 +106,12 @@ export function WizardModal({
       setIsExecuting(true)
       try {
         const supabase = createClient()
+        if (!supabase) {
+          toast.error('Supabase client not initialized')
+          setIsExecuting(false)
+          return
+        }
+
         let payload
         try {
           payload = JSON.parse(generatedCode)
