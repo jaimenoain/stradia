@@ -5,6 +5,12 @@ export async function createClient() {
   const cookieStore = await cookies()
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+      console.error('NEXT_PUBLIC_SUPABASE_URL is missing')
+    }
+    if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.error('NEXT_PUBLIC_SUPABASE_ANON_KEY is missing')
+    }
     throw new Error('Supabase environment variables are missing. Please check your .env.local file.')
   }
 
