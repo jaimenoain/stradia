@@ -5,8 +5,16 @@ import { redirect } from 'next/navigation'
 
 import { createClient } from '@/lib/supabase/server'
 
+type Client = Awaited<ReturnType<typeof createClient>>
+
 export async function login(formData: FormData) {
-  const supabase = await createClient()
+  let supabase: Client
+  try {
+    supabase = await createClient()
+  } catch (error) {
+    console.error('Supabase client creation failed:', error)
+    redirect('/login?error=Configuration error. Please contact support.')
+  }
 
   const email = formData.get('email') as string
   const password = formData.get('password') as string
@@ -25,7 +33,13 @@ export async function login(formData: FormData) {
 }
 
 export async function signup(formData: FormData) {
-  const supabase = await createClient()
+  let supabase: Client
+  try {
+    supabase = await createClient()
+  } catch (error) {
+    console.error('Supabase client creation failed:', error)
+    redirect('/signup?error=Configuration error. Please contact support.')
+  }
 
   const email = formData.get('email') as string
   const password = formData.get('password') as string
@@ -44,8 +58,12 @@ export async function signup(formData: FormData) {
 }
 
 export async function signout() {
-  const supabase = await createClient()
-  await supabase.auth.signOut()
+  try {
+    const supabase = await createClient()
+    await supabase.auth.signOut()
+  } catch (error) {
+    console.error('Sign out error:', error)
+  }
   revalidatePath('/', 'layout')
   redirect('/login')
 }
