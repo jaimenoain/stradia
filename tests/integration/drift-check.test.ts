@@ -12,7 +12,7 @@ if (typeof global.TextEncoder === 'undefined') {
 }
 
 function loadDriftCoreModule() {
-  const corePath = path.join(process.cwd(), 'supabase/functions/drift-check/core.ts');
+  const corePath = path.join(process.cwd(), 'supabase/functions/_shared/drift-core.ts');
   const source = fs.readFileSync(corePath, 'utf8');
 
   // Transpile TypeScript to CommonJS
