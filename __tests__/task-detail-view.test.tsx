@@ -19,6 +19,7 @@ jest.mock('next/navigation', () => ({
   useRouter: () => mockUseRouter,
   usePathname: () => '/app/test-market/dashboard',
   useSearchParams: jest.fn(),
+  useParams: () => ({ marketId: 'test-market' }),
 }))
 
 // Mock dependencies
