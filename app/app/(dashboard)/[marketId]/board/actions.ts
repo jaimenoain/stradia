@@ -30,7 +30,7 @@ export async function acceptTask(marketId: string, originTemplateTaskId: string)
     throw new Error('Failed to accept task')
   }
 
-  revalidatePath(`/app/${marketId}/dashboard`)
+  revalidatePath(`/app/${marketId}/board`)
 
   return data
 }
@@ -108,7 +108,7 @@ export async function updateTaskExecutionNotes(
     throw new Error('Failed to update execution notes')
   }
 
-  revalidatePath(`/app/${marketId}/dashboard`)
+  revalidatePath(`/app/${marketId}/board`)
 
   return data
 }
@@ -140,7 +140,7 @@ export async function rejectTask(marketId: string, originTemplateTaskId: string)
     throw new Error('Failed to reject task')
   }
 
-  revalidatePath(`/app/${marketId}/dashboard`)
+  revalidatePath(`/app/${marketId}/board`)
 
   return data
 }
@@ -225,7 +225,7 @@ export async function updateTaskStatus(marketId: string, taskId: string, newStat
     throw new Error('Failed to update task status')
   }
 
-  revalidatePath(`/app/${marketId}/dashboard`)
+  revalidatePath(`/app/${marketId}/board`)
 
   return data
 }
@@ -263,7 +263,7 @@ export async function createLocalTask(
     throw new Error('Failed to create local task')
   }
 
-  revalidatePath(`/app/${marketId}/dashboard`)
+  revalidatePath(`/app/${marketId}/board`)
 
   return data
 }

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createLocalTask } from '@/app/app/(dashboard)/[marketId]/dashboard/actions'
+import { createLocalTask } from '@/app/app/(dashboard)/[marketId]/board/actions'
 import {
   Dialog,
   DialogContent,

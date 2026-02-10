@@ -60,7 +60,7 @@ export function DensityMatrix({ markets, templates, data }: DensityMatrixProps) 
             {markets.map((market) => (
               <tr key={market.id} className="bg-background hover:bg-muted/50 transition-colors">
                 <th scope="row" className="px-4 py-3 font-medium text-foreground whitespace-nowrap sticky left-0 bg-background z-10 border-r group-hover:bg-muted/50">
-                  <Link href={`/app/${market.id}/dashboard`} className="hover:underline focus:outline-none focus:ring-2 focus:ring-ring rounded-sm">
+                  <Link href={`/app/${market.id}/board`} className="hover:underline focus:outline-none focus:ring-2 focus:ring-ring rounded-sm">
                     {market.name}
                   </Link>
                 </th>
@@ -107,7 +107,7 @@ function ScoreCell({ score, marketId }: { score?: MatrixScore; marketId: string 
   }
 
   return (
-    <Link href={`/app/${marketId}/dashboard`} className="flex items-center justify-center w-full h-full min-h-[40px] hover:bg-muted/30 focus:outline-none focus:ring-2 focus:ring-ring inset-0">
+    <Link href={`/app/${marketId}/board`} className="flex items-center justify-center w-full h-full min-h-[40px] hover:bg-muted/30 focus:outline-none focus:ring-2 focus:ring-ring inset-0">
       <div className={cn('px-2.5 py-0.5 rounded-full text-xs font-bold', colorClass)}>
         {percentage}%
       </div>
@@ -130,7 +130,7 @@ function MobileMarketCard({
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="border rounded-lg bg-card text-card-foreground shadow-sm">
       <div className="flex items-center justify-between p-4">
-        <Link href={`/app/${market.id}/dashboard`} className="font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-ring rounded-sm">
+        <Link href={`/app/${market.id}/board`} className="font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-ring rounded-sm">
           {market.name}
         </Link>
         <CollapsibleTrigger asChild>

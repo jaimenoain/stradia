@@ -1,4 +1,4 @@
-import { createLocalTask } from '@/app/app/(dashboard)/[marketId]/dashboard/actions'
+import { createLocalTask } from '@/app/app/(dashboard)/[marketId]/board/actions'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
@@ -48,7 +48,7 @@ describe('createLocalTask', () => {
       task_type: 'A',
       origin_template_task_id: null,
     })
-    expect(revalidatePath).toHaveBeenCalledWith(`/app/${marketId}/dashboard`)
+    expect(revalidatePath).toHaveBeenCalledWith(`/app/${marketId}/board`)
   })
 
   it('should throw error if user is not authorized', async () => {

@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { getTaskExecutionHistory } from '@/app/app/(dashboard)/[marketId]/dashboard/actions'
+import { getTaskExecutionHistory } from '@/app/app/(dashboard)/[marketId]/board/actions'
 import { ExecutionLog } from '@/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

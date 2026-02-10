@@ -86,7 +86,7 @@ export function MarketSwitcher() {
               <DropdownMenuItem
                 key={market.id}
                 onClick={() => {
-                  router.push(`/app/${market.id}/dashboard`)
+                  router.push(`/app/${market.id}/board`)
                   setOpen(false)
                 }}
                 className="gap-2 p-2"

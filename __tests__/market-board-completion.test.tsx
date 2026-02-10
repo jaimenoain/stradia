@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MarketBoard } from '@/components/dashboard/market-board'
-import { updateTaskStatus } from '@/app/app/(dashboard)/[marketId]/dashboard/actions'
+import { updateTaskStatus } from '@/app/app/(dashboard)/[marketId]/board/actions'
 
 // Mock dependencies
-jest.mock('@/app/app/(dashboard)/[marketId]/dashboard/actions', () => ({
+jest.mock('@/app/app/(dashboard)/[marketId]/board/actions', () => ({
   updateTaskStatus: jest.fn(),
   acceptTask: jest.fn(),
   rejectTask: jest.fn(),
@@ -18,8 +18,9 @@ jest.mock('@/lib/supabase/client', () => ({
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn() }),
-  usePathname: () => '/app/test-market/dashboard',
+  usePathname: () => '/app/test-market/board',
   useSearchParams: () => new URLSearchParams(),
+  useParams: () => ({ marketId: 'test-market' }),
 }))
 
 // Mock DndContext to capture onDragEnd

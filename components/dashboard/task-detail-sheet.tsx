@@ -16,7 +16,7 @@ import { useSearchParams, usePathname, useRouter, useParams } from 'next/navigat
 import { BookOpen, Activity, Settings, AlertCircle, FileText, History } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
-import { updateTaskExecutionNotes } from '@/app/app/(dashboard)/[marketId]/dashboard/actions'
+import { updateTaskExecutionNotes } from '@/app/app/(dashboard)/[marketId]/board/actions'
 import { HistoryList } from '@/components/dashboard/history-list'
 import { DriftViewer } from '@/components/dashboard/drift-viewer'
 

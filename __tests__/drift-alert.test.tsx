@@ -29,7 +29,7 @@ jest.mock('@/components/dashboard/drift-viewer', () => ({
 }))
 
 // Mock server actions
-jest.mock('@/app/app/(dashboard)/[marketId]/dashboard/actions', () => ({
+jest.mock('@/app/app/(dashboard)/[marketId]/board/actions', () => ({
   updateTaskExecutionNotes: jest.fn(),
   getTaskExecutionHistory: jest.fn(),
 }))
@@ -52,7 +52,7 @@ const mockNormalTask = {
 describe('Drift Alert Integration', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(navigation.usePathname as jest.Mock).mockReturnValue('/app/market-1/dashboard')
+    ;(navigation.usePathname as jest.Mock).mockReturnValue('/app/market-1/board')
     ;(navigation.useRouter as jest.Mock).mockReturnValue({ replace: jest.fn() })
     ;(navigation.useParams as jest.Mock).mockReturnValue({ marketId: 'market-1' })
   })

@@ -32,7 +32,7 @@ export default async function AppRootPage() {
     .limit(1)
 
   if (markets && markets.length > 0) {
-    redirect(`/app/${markets[0].id}/dashboard`)
+    redirect(`/app/${markets[0].id}/board`)
   }
 
   return (
