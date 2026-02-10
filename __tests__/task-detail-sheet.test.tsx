@@ -7,6 +7,12 @@ import * as navigation from 'next/navigation'
 // Mock server actions
 jest.mock('@/app/app/(dashboard)/[marketId]/dashboard/actions', () => ({
   updateTaskExecutionNotes: jest.fn(),
+  getTaskExecutionHistory: jest.fn(),
+}))
+
+// Mock HistoryList
+jest.mock('@/components/dashboard/history-list', () => ({
+  HistoryList: () => <div data-testid="history-list">History Content</div>
 }))
 
 // Mock RichTextEditor
@@ -82,6 +88,22 @@ describe('TaskDetailSheet', () => {
 
     expect(screen.getByText('Task B')).toBeInTheDocument()
     expect(screen.queryByText('Notes')).not.toBeInTheDocument()
+  })
+
+  it('renders History tab for Type B task', () => {
+    ;(navigation.useSearchParams as jest.Mock).mockReturnValue({
+        get: (key: string) => (key === 'taskId' ? 'task-2' : null),
+        toString: () => 'taskId=task-2',
+    })
+
+    render(<TaskDetailSheet tasks={[mockTaskA, mockTaskB]} />)
+
+    expect(screen.getByText('History')).toBeInTheDocument()
+
+    // Click History tab
+    fireEvent.click(screen.getByText('History'))
+
+    expect(screen.getByTestId('history-list')).toBeInTheDocument()
   })
 
   it('updates execution notes on blur', async () => {

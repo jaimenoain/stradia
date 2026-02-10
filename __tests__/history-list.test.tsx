@@ -151,4 +151,37 @@ describe('HistoryList', () => {
           expect(editor).toHaveAttribute('data-value', expect.stringContaining('"error": "Something went wrong"'))
       })
     })
+
+  it('renders payload if snapshots object exists but content is null', async () => {
+    const mockLogs = [
+      {
+        id: 'log-3',
+        task_id: mockTaskId,
+        user_id: null,
+        snapshot_id: 'snap-3',
+        status: 'DRIFTED',
+        payload: { drift: 'detected' },
+        created_at: '2023-01-01T12:00:00Z',
+        snapshots: { content: null },
+      },
+    ]
+
+    ;(useQuery as jest.Mock).mockReturnValue({
+      data: mockLogs,
+      isLoading: false,
+      error: null,
+    })
+
+    render(<HistoryList marketId={mockMarketId} taskId={mockTaskId} />)
+
+    expect(screen.getByText('drifted')).toBeInTheDocument()
+
+    const viewButton = screen.getByText('View Snapshot')
+    fireEvent.click(viewButton)
+
+    await waitFor(() => {
+      const editor = screen.getByTestId('monaco-editor')
+      expect(editor).toHaveAttribute('data-value', expect.stringContaining('"drift": "detected"'))
+    })
+  })
 })
