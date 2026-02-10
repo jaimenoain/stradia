@@ -6,11 +6,24 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
 import { Loader2, AlertCircle } from 'lucide-react'
 import { DiffEditor } from '@monaco-editor/react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import { useParams } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
+import { Button } from '@/components/ui/button'
+
+async function generateHash(obj: any): Promise<string> {
+  const str = JSON.stringify(obj)
+  const encoder = new TextEncoder()
+  const data = encoder.encode(str)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+}
 
 interface DriftViewerProps {
   taskId: string
@@ -22,22 +35,95 @@ export function DriftViewer({ taskId, isOpen, onClose }: DriftViewerProps) {
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [data, setData] = React.useState<{ expected: any; actual: any } | null>(null)
+  const [resolving, setResolving] = React.useState(false)
+
+  const params = useParams()
+  const marketId = params.marketId as string
+  const queryClient = useQueryClient()
+  const supabase = createClient()
 
   React.useEffect(() => {
     if (isOpen && taskId) {
       fetchDriftDetails()
     } else {
-        // Reset state when closed
-        setData(null)
-        setError(null)
+      // Reset state when closed
+      setData(null)
+      setError(null)
+      setResolving(false)
     }
   }, [isOpen, taskId])
+
+  const handleOverwrite = async () => {
+    if (!data?.expected || !supabase) return
+    setResolving(true)
+    try {
+      const { error } = await supabase.functions.invoke('execute-action', {
+        body: { taskId, payload: data.expected },
+      })
+      if (error) throw new Error(error.message)
+
+      toast.success('Drift resolved: Overwritten external changes')
+      queryClient.invalidateQueries({ queryKey: ['market-board', marketId] })
+      onClose()
+    } catch (err: any) {
+      console.error('Failed to overwrite:', err)
+      toast.error(`Failed to overwrite: ${err.message}`)
+    } finally {
+      setResolving(false)
+    }
+  }
+
+  const handleIngest = async () => {
+    if (!data?.actual || !supabase) return
+    setResolving(true)
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
+
+      const hash = await generateHash(data.actual)
+
+      // 1. Insert Execution Log
+      const { error: logError } = await supabase.from('execution_logs').insert({
+        task_id: taskId,
+        user_id: user.id,
+        status: 'DONE',
+        payload: data.actual,
+        snapshot_id: null,
+      })
+
+      if (logError) throw new Error(`Log insert failed: ${logError.message}`)
+
+      // 2. Update Task Status & Hash
+      const { error: taskError } = await supabase
+        .from('market_tasks')
+        .update({
+          status: 'DONE',
+          result_hash: hash,
+          execution_notes: `Drift resolved via Ingest. Accepted external changes as truth.`,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', taskId)
+
+      if (taskError) throw new Error(`Task update failed: ${taskError.message}`)
+
+      toast.success('Drift resolved: Ingested external changes')
+      queryClient.invalidateQueries({ queryKey: ['market-board', marketId] })
+      onClose()
+    } catch (err: any) {
+      console.error('Failed to ingest:', err)
+      toast.error(`Failed to ingest: ${err.message}`)
+    } finally {
+      setResolving(false)
+    }
+  }
 
   const fetchDriftDetails = async () => {
     setLoading(true)
     setError(null)
     try {
-      const supabase = createClient()
+      if (!supabase) return
       const { data: result, error: funcError } = await supabase.functions.invoke('get-drift-details', {
         body: { taskId },
       })
@@ -108,6 +194,27 @@ export function DriftViewer({ taskId, isOpen, onClose }: DriftViewerProps) {
             </div>
           )}
         </div>
+
+        {!loading && !error && data && (
+          <div className="p-4 border-t bg-background">
+            <DialogFooter className="gap-2 sm:justify-between">
+              <div className="flex items-center text-sm text-muted-foreground">
+                <AlertCircle className="w-4 h-4 mr-2" />
+                Resolution required to restore task integrity.
+              </div>
+              <div className="flex gap-2">
+                <Button variant="secondary" onClick={handleIngest} disabled={resolving}>
+                  {resolving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                  Ingest Drift
+                </Button>
+                <Button variant="destructive" onClick={handleOverwrite} disabled={resolving}>
+                  {resolving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                  Overwrite External
+                </Button>
+              </div>
+            </DialogFooter>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   )
