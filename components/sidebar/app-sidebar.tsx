@@ -3,6 +3,7 @@
 import * as React from 'react'
 import {
   Briefcase,
+  Globe,
   LayoutDashboard,
   Settings,
   ShoppingBag,
@@ -22,7 +23,13 @@ import { useActiveMarket } from '@/hooks/use-active-market'
 // Menu items.
 const items = [
   {
-    title: 'Global Dashboard',
+    title: 'Satellite View',
+    url: '/app/dashboard',
+    icon: Globe,
+    requiresMarket: false,
+  },
+  {
+    title: 'Market Board',
     url: (marketId: string) => `/app/${marketId}/dashboard`,
     icon: LayoutDashboard,
   },
