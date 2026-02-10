@@ -46,15 +46,10 @@ export async function generateHash(obj: any): Promise<string> {
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-/**
- * Core Drift Check Logic
- */
-export async function checkDrift(
+export async function getLastExecutionLog(
   supabase: SupabaseClient,
-  taskId: string,
-  livePayload: any
-): Promise<DriftResult> {
-  // 1. Fetch Latest Execution Log (Stradia Truth)
+  taskId: string
+): Promise<any> {
   const { data: logData, error: logError } = await supabase
     .from("execution_logs")
     .select("payload")
@@ -67,7 +62,24 @@ export async function checkDrift(
      throw new Error(`Failed to fetch execution logs: ${logError.message}`);
   }
 
-  const truthPayloadRaw = logData?.payload || {};
+  return logData?.payload || {};
+}
+
+/**
+ * Core Drift Check Logic
+ */
+export async function checkDrift(
+  supabase: SupabaseClient,
+  taskId: string,
+  livePayload: any,
+  truthPayload?: any
+): Promise<DriftResult> {
+  // 1. Fetch Latest Execution Log (Stradia Truth) if not provided
+  let truthPayloadRaw = truthPayload;
+  if (!truthPayloadRaw) {
+    truthPayloadRaw = await getLastExecutionLog(supabase, taskId);
+  }
+
   const livePayloadRaw = livePayload || {};
 
   // 2. Normalize Inputs
