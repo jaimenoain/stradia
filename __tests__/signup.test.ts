@@ -63,9 +63,9 @@ describe('signup action', () => {
     (createClient as jest.Mock).mockResolvedValue(mockSupabase)
     mockSupabase.auth.signUp.mockResolvedValue({ error: { message: 'Auth error' } })
 
-    await expect(signup(mockFormData)).rejects.toThrow('Redirected to /signup?error=Could not authenticate user')
+    await expect(signup(mockFormData)).rejects.toThrow('Redirected to /signup?error=Auth%20error')
 
     expect(mockSupabase.auth.signUp).toHaveBeenCalled()
-    expect(redirect).toHaveBeenCalledWith('/signup?error=Could not authenticate user')
+    expect(redirect).toHaveBeenCalledWith('/signup?error=Auth%20error')
   })
 })
