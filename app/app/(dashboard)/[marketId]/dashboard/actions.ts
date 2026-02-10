@@ -68,7 +68,11 @@ export async function getTaskExecutionHistory(marketId: string, taskId: string) 
     throw new Error('Failed to fetch execution history')
   }
 
-  return data
+  // Transform data to match ExecutionLog interface
+  return data.map((log: any) => ({
+    ...log,
+    snapshots: Array.isArray(log.snapshots) ? log.snapshots[0] || null : log.snapshots,
+  }))
 }
 
 export async function updateTaskExecutionNotes(
