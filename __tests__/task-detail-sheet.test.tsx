@@ -1,11 +1,11 @@
 import '@testing-library/jest-dom'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { TaskDetailSheet } from '@/components/dashboard/task-detail-sheet'
-import { updateTaskExecutionNotes } from '@/app/app/(dashboard)/[marketId]/dashboard/actions'
+import { updateTaskExecutionNotes } from '@/app/app/(dashboard)/[marketId]/board/actions'
 import * as navigation from 'next/navigation'
 
 // Mock server actions
-jest.mock('@/app/app/(dashboard)/[marketId]/dashboard/actions', () => ({
+jest.mock('@/app/app/(dashboard)/[marketId]/board/actions', () => ({
   updateTaskExecutionNotes: jest.fn(),
   getTaskExecutionHistory: jest.fn(),
 }))
@@ -13,6 +13,11 @@ jest.mock('@/app/app/(dashboard)/[marketId]/dashboard/actions', () => ({
 // Mock HistoryList
 jest.mock('@/components/dashboard/history-list', () => ({
   HistoryList: () => <div data-testid="history-list">History Content</div>
+}))
+
+// Mock DriftViewer
+jest.mock('@/components/dashboard/drift-viewer', () => ({
+  DriftViewer: () => <div data-testid="drift-viewer">Drift Viewer Content</div>
 }))
 
 // Mock RichTextEditor
@@ -61,7 +66,7 @@ const mockTaskB = {
 describe('TaskDetailSheet', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(navigation.usePathname as jest.Mock).mockReturnValue('/app/market-1/dashboard')
+    ;(navigation.usePathname as jest.Mock).mockReturnValue('/app/market-1/board')
     ;(navigation.useRouter as jest.Mock).mockReturnValue({ replace: jest.fn() })
     ;(navigation.useParams as jest.Mock).mockReturnValue({ marketId: 'market-1' })
   })

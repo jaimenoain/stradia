@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MarketBoard } from '@/components/dashboard/market-board'
 import { MarketBoardTask } from '@/types'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { createLocalTask } from '@/app/app/(dashboard)/[marketId]/dashboard/actions'
+import { createLocalTask } from '@/app/app/(dashboard)/[marketId]/board/actions'
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
@@ -11,8 +11,9 @@ jest.mock('next/navigation', () => ({
     replace: jest.fn(),
     prefetch: jest.fn(),
   }),
-  usePathname: () => '/app/test-market/dashboard',
+  usePathname: () => '/app/test-market/board',
   useSearchParams: () => new URLSearchParams(),
+  useParams: () => ({ marketId: 'test-market' }),
 }))
 
 // Mock dependencies
@@ -29,7 +30,7 @@ jest.mock('@/lib/supabase/client', () => ({
   })),
 }))
 
-jest.mock('@/app/app/(dashboard)/[marketId]/dashboard/actions', () => ({
+jest.mock('@/app/app/(dashboard)/[marketId]/board/actions', () => ({
   acceptTask: jest.fn(),
   rejectTask: jest.fn(),
   updateTaskStatus: jest.fn(),

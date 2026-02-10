@@ -30,7 +30,7 @@ const items = [
   },
   {
     title: 'Market Board',
-    url: (marketId: string) => `/app/${marketId}/dashboard`,
+    url: (marketId: string) => `/app/${marketId}/board`,
     icon: LayoutDashboard,
   },
   {

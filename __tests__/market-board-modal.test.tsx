@@ -4,7 +4,7 @@ import { MarketBoard } from '@/components/dashboard/market-board'
 import { useQuery, useMutation } from '@tanstack/react-query'
 
 // Mock server actions
-jest.mock('@/app/app/(dashboard)/[marketId]/dashboard/actions', () => ({
+jest.mock('@/app/app/(dashboard)/[marketId]/board/actions', () => ({
   updateTaskStatus: jest.fn(),
   acceptTask: jest.fn(),
   rejectTask: jest.fn(),

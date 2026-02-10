@@ -12,12 +12,12 @@ This document outlines the verification plan for the Dashboard Navigation logic,
 ## Verification Checklist
 
 ### 1. Persistence
-- [ ] **Navigate between pages**: Go from `/app/[marketId]/dashboard` to `/app/[marketId]/settings`.
+- [ ] **Navigate between pages**: Go from `/app/[marketId]/board` to `/app/[marketId]/settings`.
 - [ ] **Verify Sidebar**: Ensure the Sidebar does not flicker or unmount. The `SidebarProvider` in the layout handles this.
 
 ### 2. URL as Truth
 - [ ] **Switch Market**: Use the Market Switcher in the sidebar to select a different market.
-- [ ] **Verify URL**: The URL should change to `/app/[newMarketId]/dashboard`.
+- [ ] **Verify URL**: The URL should change to `/app/[newMarketId]/board`.
 - [ ] **Refresh Page**: Refreshing the page should keep the selected market active.
 
 ### 3. Reactivity

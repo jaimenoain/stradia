@@ -14,7 +14,7 @@ jest.mock('next/navigation', () => ({
     replace: jest.fn(),
     prefetch: jest.fn(),
   }),
-  usePathname: () => '/app/test-market/dashboard',
+  usePathname: () => '/app/test-market/board',
   useSearchParams: () => new URLSearchParams(),
   useParams: () => ({ marketId: 'test-market' }),
 }))
@@ -33,7 +33,7 @@ jest.mock('@/lib/supabase/client', () => ({
   })),
 }))
 
-jest.mock('@/app/app/(dashboard)/[marketId]/dashboard/actions', () => ({
+jest.mock('@/app/app/(dashboard)/[marketId]/board/actions', () => ({
   acceptTask: jest.fn(),
   rejectTask: jest.fn(),
   updateTaskStatus: jest.fn(),
