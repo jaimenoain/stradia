@@ -13,10 +13,11 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { useSearchParams, usePathname, useRouter, useParams } from 'next/navigation'
-import { BookOpen, Activity, Settings, AlertCircle, FileText } from 'lucide-react'
+import { BookOpen, Activity, Settings, AlertCircle, FileText, History } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { updateTaskExecutionNotes } from '@/app/app/(dashboard)/[marketId]/dashboard/actions'
+import { HistoryList } from '@/components/dashboard/history-list'
 
 interface TaskDetailSheetProps {
   tasks: MarketBoardTask[]
@@ -41,7 +42,7 @@ export function TaskDetailSheet({ tasks }: TaskDetailSheetProps) {
   const isOpen = !!taskId && !!task
 
   // Tab state
-  const [activeTab, setActiveTab] = React.useState<'guide' | 'activity' | 'config' | 'notes'>('guide')
+  const [activeTab, setActiveTab] = React.useState<'guide' | 'activity' | 'config' | 'notes' | 'history'>('guide')
   const [notes, setNotes] = React.useState('')
 
   // Reset tab when task changes and sync notes
@@ -146,6 +147,19 @@ export function TaskDetailSheet({ tasks }: TaskDetailSheetProps) {
               <Activity className="w-3.5 h-3.5 mr-2" />
               Activity
             </Button>
+
+            {task.task_type !== 'A' && (
+              <Button
+                variant={activeTab === 'history' ? 'secondary' : 'ghost'}
+                size="sm"
+                className="flex-1 h-8 text-xs font-medium"
+                onClick={() => setActiveTab('history')}
+              >
+                <History className="w-3.5 h-3.5 mr-2" />
+                History
+              </Button>
+            )}
+
             <Button
               variant={activeTab === 'config' ? 'secondary' : 'ghost'}
               size="sm"
@@ -217,6 +231,10 @@ export function TaskDetailSheet({ tasks }: TaskDetailSheetProps) {
                   </div>
                 </div>
               </div>
+            )}
+
+            {activeTab === 'history' && task.task_type !== 'A' && (
+              <HistoryList marketId={marketId} taskId={task.id} />
             )}
 
             {activeTab === 'config' && (

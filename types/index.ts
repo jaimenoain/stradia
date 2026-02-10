@@ -51,3 +51,16 @@ export interface MarketBoardTask {
   task_config: Record<string, any>
   execution_notes: string | null
 }
+
+export interface ExecutionLog {
+  id: string
+  task_id: string
+  user_id: string | null
+  snapshot_id: string | null
+  status: string
+  payload: Record<string, any>
+  created_at: string
+  snapshots?: {
+    content: Record<string, any>
+  } | null
+}

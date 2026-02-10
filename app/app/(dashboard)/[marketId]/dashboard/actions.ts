@@ -35,6 +35,42 @@ export async function acceptTask(marketId: string, originTemplateTaskId: string)
   return data
 }
 
+export async function getTaskExecutionHistory(marketId: string, taskId: string) {
+  const supabase = await createClient()
+
+  // Ensure user is authorized
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
+  if (authError || !user) throw new Error('Unauthorized')
+
+  // Fetch execution logs with snapshot details
+  const { data, error } = await supabase
+    .from('execution_logs')
+    .select(`
+      id,
+      task_id,
+      user_id,
+      snapshot_id,
+      status,
+      payload,
+      created_at,
+      snapshots (
+        content
+      )
+    `)
+    .eq('task_id', taskId)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching execution history:', error)
+    throw new Error('Failed to fetch execution history')
+  }
+
+  return data
+}
+
 export async function updateTaskExecutionNotes(
   marketId: string,
   taskId: string,
