@@ -38,6 +38,7 @@ export function DriftViewer({ taskId, isOpen, onClose }: DriftViewerProps) {
     setError(null)
     try {
       const supabase = createClient()
+      if (!supabase) throw new Error('Supabase client not initialized')
       const { data: result, error: funcError } = await supabase.functions.invoke('get-drift-details', {
         body: { taskId },
       })
