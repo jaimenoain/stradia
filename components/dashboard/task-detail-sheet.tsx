@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { updateTaskExecutionNotes } from '@/app/app/(dashboard)/[marketId]/dashboard/actions'
 import { HistoryList } from '@/components/dashboard/history-list'
+import { DriftViewer } from '@/components/dashboard/drift-viewer'
 
 interface TaskDetailSheetProps {
   tasks: MarketBoardTask[]
@@ -44,11 +45,13 @@ export function TaskDetailSheet({ tasks }: TaskDetailSheetProps) {
   // Tab state
   const [activeTab, setActiveTab] = React.useState<'guide' | 'activity' | 'config' | 'notes' | 'history'>('guide')
   const [notes, setNotes] = React.useState('')
+  const [isDriftViewerOpen, setIsDriftViewerOpen] = React.useState(false)
 
   // Reset tab when task changes and sync notes
   React.useEffect(() => {
     if (taskId) {
       setActiveTab('guide')
+      setIsDriftViewerOpen(false)
     }
   }, [taskId])
 
@@ -101,17 +104,43 @@ export function TaskDetailSheet({ tasks }: TaskDetailSheetProps) {
               <Badge variant={
                 task.status === 'DONE' ? 'default' :
                 task.status === 'IN_PROGRESS' ? 'secondary' :
+                task.status === 'DRIFTED' ? 'destructive' :
                 'outline'
               }>
                 {task.status.replace('_', ' ')}
               </Badge>
 
-              {/* Placeholder Drift Indicator */}
-              <div className="flex items-center gap-1.5 text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full text-xs font-medium">
-                <AlertCircle className="w-3 h-3" />
-                <span>Drift: Stable</span>
-              </div>
+              {task.status !== 'DRIFTED' && (
+                <div className="flex items-center gap-1.5 text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full text-xs font-medium">
+                  <AlertCircle className="w-3 h-3" />
+                  <span>Drift: Stable</span>
+                </div>
+              )}
             </div>
+
+            {task.status === 'DRIFTED' && (
+              <div className="mt-4 bg-destructive/10 border-l-4 border-destructive p-4 rounded-r-md animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="flex items-start justify-between">
+                  <div className="flex gap-3">
+                    <AlertCircle className="h-5 w-5 text-destructive mt-0.5 shrink-0" />
+                    <div>
+                      <h4 className="text-sm font-semibold text-destructive">Drift Alert: External changes detected</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        The external configuration for this task no longer matches the expected state.
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="h-8 text-xs shrink-0 ml-4"
+                    onClick={() => setIsDriftViewerOpen(true)}
+                  >
+                    Review Changes
+                  </Button>
+                </div>
+              </div>
+            )}
           </SheetHeader>
 
           {/* Tab Navigation */}
@@ -253,6 +282,12 @@ export function TaskDetailSheet({ tasks }: TaskDetailSheetProps) {
           </div>
         </div>
       </SheetContent>
+
+      <DriftViewer
+        taskId={task.id}
+        isOpen={isDriftViewerOpen}
+        onClose={() => setIsDriftViewerOpen(false)}
+      />
     </Sheet>
   )
 }
