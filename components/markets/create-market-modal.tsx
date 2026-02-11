@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -17,7 +18,15 @@ import {
 import { Input } from '@/components/ui/input'
 import { createMarket } from '@/app/app/(dashboard)/admin/markets/actions'
 
-export function CreateMarketModal() {
+interface CreateMarketModalProps {
+  trigger?: React.ReactNode
+  redirectToBoard?: boolean
+}
+
+export function CreateMarketModal({
+  trigger,
+  redirectToBoard = false,
+}: CreateMarketModalProps) {
   const [open, setOpen] = React.useState(false)
   const [name, setName] = React.useState('')
   const [region, setRegion] = React.useState('')
@@ -25,16 +34,21 @@ export function CreateMarketModal() {
   const [error, setError] = React.useState<string | null>(null)
 
   const queryClient = useQueryClient()
+  const router = useRouter()
 
   const { mutate, isPending } = useMutation({
     mutationFn: createMarket,
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['markets'] })
       setOpen(false)
       setName('')
       setRegion('')
       setCurrency('')
       setError(null)
+
+      if (redirectToBoard && data?.id) {
+        router.push(`/app/${data.id}/board`)
+      }
     },
     onError: (err) => {
       setError(err.message || 'Failed to create market')
@@ -53,10 +67,14 @@ export function CreateMarketModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Market
-        </Button>
+        {trigger ? (
+          trigger
+        ) : (
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Market
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
