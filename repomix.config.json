@@ -1,0 +1,24 @@
+{
+  "output": {
+    "style": "xml",
+    "showLineNumbers": true,
+    "removeEmptyLines": true,
+    "instructionFilePath": ".ai-status.md"
+  },
+  "ignore": {
+    "customPatterns": [
+      ".next/",
+      "out/",
+      "build/",
+      "public/",
+      "images/",
+      "fonts/",
+      "package-lock.json",
+      "yarn.lock",
+      "pnpm-lock.yaml"
+    ]
+  },
+  "include": [
+    "**/*"
+  ]
+}
