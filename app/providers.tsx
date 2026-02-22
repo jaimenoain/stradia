@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { ThemeProvider as NextThemesProvider } from "next-themes"
+import { AuthProvider } from "@/lib/auth/provider"
 
 // Mock QueryClient and Provider since package is missing
 interface QueryClientType {
@@ -14,15 +15,6 @@ class QueryClient implements QueryClientType {
 
 function QueryClientProvider({ client, children }: { client: QueryClientType, children: React.ReactNode }) {
     return <QueryContext.Provider value={client}>{children}</QueryContext.Provider>
-}
-
-// Mock AuthProvider since package is missing
-interface AuthContextType {
-    user: null;
-}
-const AuthContext = React.createContext<AuthContextType | null>(null)
-function AuthProvider({ children }: { children: React.ReactNode }) {
-    return <AuthContext.Provider value={{ user: null }}>{children}</AuthContext.Provider>
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
