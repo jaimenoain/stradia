@@ -15,8 +15,9 @@ export const apiClient = {
       }
 
       return { data: data as T };
-    } catch (error: any) {
-      return { data: {} as T, error: error.message };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      return { data: {} as T, error: message };
     }
   },
 
@@ -38,8 +39,9 @@ export const apiClient = {
       }
 
       return { data: data as T };
-    } catch (error: any) {
-      return { data: {} as T, error: error.message };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      return { data: {} as T, error: message };
     }
   },
 
@@ -61,8 +63,9 @@ export const apiClient = {
       }
 
       return { data: data as T };
-    } catch (error: any) {
-      return { data: {} as T, error: error.message };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      return { data: {} as T, error: message };
     }
   },
 
@@ -80,8 +83,9 @@ export const apiClient = {
       }
 
       return { data: data as T };
-    } catch (error: any) {
-      return { data: {} as T, error: error.message };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      return { data: {} as T, error: message };
     }
   },
 };
