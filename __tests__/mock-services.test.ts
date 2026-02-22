@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { apiClient } from '@/lib/api/client';
-// @ts-ignore - This module does not exist yet, intentionally causing a failure or type error
-import { useSessionStore } from '@/lib/auth/store';
+import { apiClient } from '@/lib/api-client';
+import { useSessionStore } from '@/lib/stores/session-store';
 import { UserRole, MockSessionUser } from '@/lib/auth/types';
 
 describe('Mock Services Verification', () => {
