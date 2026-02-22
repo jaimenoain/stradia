@@ -3,7 +3,7 @@ import fs from 'node:fs';
 const aiStatus = fs.readFileSync('.ai-status.md', 'utf-8');
 
 /** @type {import('repomix').RepomixConfig} */
-export default {
+const config = {
   output: {
     style: 'xml',
     showLineNumbers: true,
@@ -30,3 +30,5 @@ export default {
     "**/*"
   ]
 };
+
+export default config;
