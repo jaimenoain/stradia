@@ -1,9 +1,13 @@
 #!/bin/bash
 set -e
 
-# Assert repomix.config.json exists
-if [ ! -f repomix.config.json ]; then
-  echo "Error: repomix.config.json does not exist."
+# Assert repomix configuration file exists
+if [ -f repomix.config.mjs ]; then
+  echo "Found repomix.config.mjs"
+elif [ -f repomix.config.json ]; then
+  echo "Found repomix.config.json"
+else
+  echo "Error: No repomix configuration file found."
   exit 1
 fi
 
@@ -19,10 +23,10 @@ fi
 echo "Verifying contents of repomix-output.xml..."
 
 # Assert .ai-status.md *content* is present near the top (first 200 lines)
-# Since we use instructionFilePath, it should appear early.
+# Since we use headerText in .mjs or instructionFilePath in .json, it should appear early.
 head -n 200 repomix-output.xml | grep "# AI Status" > /dev/null
 if [ $? -eq 0 ]; then
-  echo "Success: .ai-status.md content found near the top (as instructions)."
+  echo "Success: .ai-status.md content found near the top (as instructions/header)."
 else
   echo "Error: .ai-status.md content not found in the first 200 lines."
   exit 1
