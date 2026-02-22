@@ -13,3 +13,64 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
+enum UserRole {
+  GLOBAL_ADMIN
+  SUPERVISOR
+  LOCAL_USER
+  READ_ONLY
+}
+
+model Tenant {
+  id                   String    @id @default(uuid())
+  name                 String
+  stripe_customer_id   String?
+  active_markets_limit Int
+  user_seat_limit      Int
+  ai_token_quota       Int
+  ai_tokens_used       Int
+  token_reset_date     DateTime?
+  is_active            Boolean
+  created_at           DateTime  @default(now())
+
+  users   User[]
+  markets Market[]
+}
+
+model User {
+  id                  String    @id @default(uuid())
+  tenant_id           String
+  email               String    @unique
+  password_hash       String
+  role                UserRole
+  language_preference String
+  last_login_at       DateTime?
+
+  tenant  Tenant       @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  markets UserMarket[]
+}
+
+model Market {
+  id          String    @id @default(uuid())
+  tenant_id   String
+  name        String
+  region_code String
+  timezone    String
+  is_active   Boolean
+  deleted_at  DateTime?
+
+  tenant Tenant       @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  users  UserMarket[]
+
+  @@unique([name, tenant_id])
+}
+
+model UserMarket {
+  user_id   String
+  market_id String
+
+  user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  market Market @relation(fields: [market_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, market_id])
+}
