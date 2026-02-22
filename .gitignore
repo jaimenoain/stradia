@@ -49,3 +49,5 @@ repomix-output.xml
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+/lib/generated/prisma
