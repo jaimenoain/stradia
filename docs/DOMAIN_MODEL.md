@@ -58,16 +58,16 @@ enum PreFlightStatus {
 
 /// The root entity representing the enterprise client\[cite: 31\].  
 model Tenant {  
-  id                   String   @id @default(uuid())  
+  id                   String    @id @default(uuid())
   name                 String  
   stripe\_customer\_id   String?  
-  active\_markets\_limit Int      @default(1)  
-  user\_seat\_limit      Int      @default(5)  
-  monthly\_token\_quota  Int      @default(0) /// \[cite: 900\]  
-  ai\_tokens\_used       Int      @default(0)  
-  token\_reset\_date     DateTime  
-  is\_active            Boolean  @default(true) /// \[cite: 885\]  
-  created\_at           DateTime @default(now())
+  active\_markets\_limit Int
+  user\_seat\_limit      Int
+  ai\_token\_quota       Int
+  ai\_tokens\_used       Int
+  token\_reset\_date     DateTime?
+  is\_active            Boolean
+  created\_at           DateTime  @default(now())
 
   users                User\[\]  
   markets              Market\[\]  
@@ -77,19 +77,16 @@ model Tenant {
 
 /// The individual actor interacting with the platform\[cite: 38\].  
 model User {  
-  id                  String   @id @default(uuid())  
+  id                  String    @id @default(uuid())
   tenant\_id           String  
-  email               String   @unique  
-  password\_hash       String?  // Nullable due to OAuth \[cite: 307\]  
+  email               String    @unique
+  password\_hash       String
   role                UserRole  
-  language\_preference String   @default("en")  
-  last\_login\_at       DateTime?  
-  created\_at          DateTime @default(now())
+  language\_preference String
+  last\_login\_at       DateTime?
 
   tenant              Tenant       @relation(fields: \[tenant\_id\], references: \[id\], onDelete: Cascade)  
-  user\_markets        UserMarket\[\]
-
-  @@index(\[tenant\_id\])  
+  markets             UserMarket\[\]
 }
 
 /// The localized operational environment\[cite: 44\].  
@@ -97,18 +94,17 @@ model Market {
   id          String    @id @default(uuid())  
   tenant\_id   String  
   name        String  
-  region\_code String?  
-  timezone    String    @default("UTC") /// \[cite: 370\]  
-  is\_active   Boolean   @default(true)  
-  deleted\_at  DateTime? /// Soft delete flag \[cite: 45\]
+  region\_code String
+  timezone    String
+  is\_active   Boolean
+  deleted\_at  DateTime?
 
   tenant      Tenant    @relation(fields: \[tenant\_id\], references: \[id\], onDelete: Cascade)  
-  boards      LocalBoard\[\]  
-  vault       VaultCredential\[\]  
   users       UserMarket\[\]
+  boards      LocalBoard\[\]  
+  vault       VaultCredential\[\]
 
-  @@unique(\[tenant\_id, name\]) /// Unique within tenant \[cite: 376\]  
-  @@index(\[tenant\_id\])  
+  @@unique(\[name, tenant\_id\])
 }
 
 /// Join table mapping users to restricted markets\[cite: 42\].  
