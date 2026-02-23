@@ -16,15 +16,15 @@ DROP POLICY IF EXISTS "usermarket_isolation" ON "UserMarket";
 -- Users can only see/modify their own tenant record
 CREATE POLICY "tenant_isolation" ON "Tenant"
 FOR ALL
-USING (id::uuid = (select auth.jwt() -> 'app_metadata' ->> 'tenant_id')::uuid)
-WITH CHECK (id::uuid = (select auth.jwt() -> 'app_metadata' ->> 'tenant_id')::uuid);
+USING (id::uuid = get_jwt_tenant_id())
+WITH CHECK (id::uuid = get_jwt_tenant_id());
 
 -- User Policies
 -- Users can only see/modify users in their own tenant
 CREATE POLICY "tenant_isolation" ON "User"
 FOR ALL
-USING (tenant_id::uuid = (select auth.jwt() -> 'app_metadata' ->> 'tenant_id')::uuid)
-WITH CHECK (tenant_id::uuid = (select auth.jwt() -> 'app_metadata' ->> 'tenant_id')::uuid);
+USING (tenant_id::uuid = get_jwt_tenant_id())
+WITH CHECK (tenant_id::uuid = get_jwt_tenant_id());
 
 -- UserMarket Policies
 -- Visibility restricted to users within the same tenant
@@ -34,14 +34,14 @@ USING (
   exists (
     select 1 from "User"
     where id = "UserMarket".user_id
-    and tenant_id::uuid = (select auth.jwt() -> 'app_metadata' ->> 'tenant_id')::uuid
+    and tenant_id::uuid = get_jwt_tenant_id()
   )
 )
 WITH CHECK (
   exists (
     select 1 from "User"
     where id = "UserMarket".user_id
-    and tenant_id::uuid = (select auth.jwt() -> 'app_metadata' ->> 'tenant_id')::uuid
+    and tenant_id::uuid = get_jwt_tenant_id()
   )
 );
 
@@ -50,7 +50,7 @@ WITH CHECK (
 CREATE POLICY "market_isolation" ON "Market"
 FOR ALL
 USING (
-  tenant_id::uuid = (select auth.jwt() -> 'app_metadata' ->> 'tenant_id')::uuid
+  tenant_id::uuid = get_jwt_tenant_id()
   AND
   (
     -- Global Admin Override
@@ -69,7 +69,7 @@ USING (
   )
 )
 WITH CHECK (
-  tenant_id::uuid = (select auth.jwt() -> 'app_metadata' ->> 'tenant_id')::uuid
+  tenant_id::uuid = get_jwt_tenant_id()
   AND
   (
     -- Global Admin Override
