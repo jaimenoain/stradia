@@ -159,7 +159,7 @@ async function verifyPolicies(db: any) {
 async function setJwt(db: any, sub: string, tenantId: string) {
   const jwt = JSON.stringify({
     sub: sub,
-    tenant_id: tenantId,
+    // tenant_id: tenantId, // Intentionally removed to strictly test app_metadata
     app_metadata: {
       tenant_id: tenantId
     }
