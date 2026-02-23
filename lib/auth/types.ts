@@ -1,13 +1,5 @@
-export enum UserRole {
-  GLOBAL_ADMIN = 'GLOBAL_ADMIN',
-  SUPERVISOR = 'SUPERVISOR',
-  LOCAL_USER = 'LOCAL_USER',
-  READ_ONLY = 'READ_ONLY'
-}
+import { User, UserRole } from '@prisma/client';
 
-export interface MockSessionUser {
-  id: string;
-  tenant_id: string;
-  email: string;
-  role: UserRole;
-}
+export { UserRole };
+
+export type MockSessionUser = Pick<User, 'id' | 'tenant_id' | 'email' | 'role'>;
