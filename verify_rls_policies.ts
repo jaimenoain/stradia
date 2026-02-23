@@ -153,6 +153,25 @@ async function verifyPolicies(db: any) {
   }
   console.log('✅ Tenant Isolation verified.');
 
+  // Test 5: UserMarket Isolation
+  console.log('\n--- Test 5: UserMarket Isolation ---');
+  // User A1 (Tenant A) -> Should see 1 mapping (User A1 -> Market A1)
+  await setJwt(db, 'aaaa2222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111');
+  const userMarketA = await db.query(`SELECT * FROM "UserMarket"`);
+  assert(userMarketA.rows.length === 1, `User A1 should see 1 UserMarket mapping, saw ${userMarketA.rows.length}`);
+  if (userMarketA.rows.length > 0) {
+      assert(userMarketA.rows[0].user_id === 'aaaa2222-2222-2222-2222-222222222222', 'User A1 should see own mapping');
+      assert(userMarketA.rows[0].market_id === 'mkt-a1-1111-1111-1111-111111111111', 'User A1 should see correct market mapping');
+  }
+  console.log('✅ User A1 sees own UserMarket mapping.');
+
+  // User B1 (Tenant B) -> Should see 0 mappings (User A1's mapping is hidden)
+  await setJwt(db, 'bbbb1111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222');
+  const userMarketB = await db.query(`SELECT * FROM "UserMarket"`);
+  assert(userMarketB.rows.length === 0, `User B1 should see 0 UserMarket mappings, saw ${userMarketB.rows.length}`);
+  console.log('✅ User B1 sees 0 UserMarket mappings.');
+
+
   console.log('\n✅ ALL TESTS PASSED');
 }
 
