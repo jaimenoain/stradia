@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach, Mock } from 'vitest';
+import '@testing-library/jest-dom';
 import LoginPage from '@/app/(auth)/login/page';
 import * as AuthProviderModule from '@/lib/auth/provider';
 

@@ -18,6 +18,7 @@ export const MOCK_USERS: MockSessionUser[] = [
     tenant_id: 'tenant-1',
     email: 'user@stradia.io',
     role: UserRole.LOCAL_USER,
+    market_id: 'market-123',
   },
   {
     id: 'user-read-only',
