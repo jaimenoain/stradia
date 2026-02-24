@@ -1,26 +1,11 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { createClient } from '@/lib/supabase/server'
-import { UserRole } from '@prisma/client'
+import { createMarketCore, deleteMarketCore, marketSchema, ActionState } from './market-core'
 
-const marketSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  region_code: z.string().min(1, 'Region code is required'),
-  timezone: z.string().min(1, 'Timezone is required'),
-})
-
-export type ActionState = {
-  success: boolean
-  message: string
-  errors?: {
-    name?: string[]
-    region_code?: string[]
-    timezone?: string[]
-  }
-}
+export type { ActionState }
 
 export async function createMarketAction(prevState: ActionState, formData: FormData): Promise<ActionState> {
   const supabase = await createClient()
@@ -35,8 +20,8 @@ export async function createMarketAction(prevState: ActionState, formData: FormD
     select: { tenant_id: true, role: true },
   })
 
-  if (!dbUser || dbUser.role !== UserRole.GLOBAL_ADMIN) {
-    return { success: false, message: 'Forbidden: Only Global Admins can create markets' }
+  if (!dbUser) {
+    return { success: false, message: 'User not found in database' }
   }
 
   const validatedFields = marketSchema.safeParse({
@@ -53,46 +38,18 @@ export async function createMarketAction(prevState: ActionState, formData: FormD
     }
   }
 
-  const { name, region_code, timezone } = validatedFields.data
+  // Pass dbUser.role as string to satisfy the core function signature which accepts string for compatibility
+  const result = await createMarketCore(
+    { id: user.id, tenant_id: dbUser.tenant_id, role: dbUser.role as unknown as string },
+    prisma,
+    validatedFields.data
+  )
 
-  try {
-    const tenant = await prisma.tenant.findUnique({
-      where: { id: dbUser.tenant_id },
-      select: { active_markets_limit: true },
-    })
-
-    if (!tenant) {
-      return { success: false, message: 'Tenant not found' }
-    }
-
-    const currentMarketCount = await prisma.market.count({
-      where: {
-        tenant_id: dbUser.tenant_id,
-        is_active: true,
-        deleted_at: null,
-      },
-    })
-
-    if (currentMarketCount >= tenant.active_markets_limit) {
-      return { success: false, message: 'Active Market limit reached' }
-    }
-
-    await prisma.market.create({
-      data: {
-        tenant_id: dbUser.tenant_id,
-        name,
-        region_code,
-        timezone,
-        is_active: true,
-      },
-    })
-
+  if (result.success) {
     revalidatePath('/settings')
-    return { success: true, message: 'Market created successfully' }
-  } catch (error) {
-    console.error('Failed to create market:', error)
-    return { success: false, message: 'Failed to create market' }
   }
+
+  return result
 }
 
 export async function deleteMarketAction(prevState: ActionState, formData: FormData): Promise<ActionState> {
@@ -114,31 +71,19 @@ export async function deleteMarketAction(prevState: ActionState, formData: FormD
     select: { tenant_id: true, role: true },
   })
 
-  if (!dbUser || dbUser.role !== UserRole.GLOBAL_ADMIN) {
-    return { success: false, message: 'Forbidden: Only Global Admins can delete markets' }
+  if (!dbUser) {
+    return { success: false, message: 'User not found in database' }
   }
 
-  try {
-    const market = await prisma.market.findUnique({
-      where: { id: marketId },
-    })
+  const result = await deleteMarketCore(
+    { id: user.id, tenant_id: dbUser.tenant_id, role: dbUser.role as unknown as string },
+    prisma,
+    marketId
+  )
 
-    if (!market || market.tenant_id !== dbUser.tenant_id) {
-      return { success: false, message: 'Market not found or access denied' }
-    }
-
-    await prisma.market.update({
-      where: { id: marketId },
-      data: {
-        is_active: false,
-        deleted_at: new Date(),
-      },
-    })
-
+  if (result.success) {
     revalidatePath('/settings')
-    return { success: true, message: 'Market deleted successfully' }
-  } catch (error) {
-    console.error('Failed to delete market:', error)
-    return { success: false, message: 'Failed to delete market' }
   }
+
+  return result
 }
