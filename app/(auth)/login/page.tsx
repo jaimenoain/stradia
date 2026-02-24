@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getMockUserByEmail } from "@/lib/auth/mock";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -22,6 +23,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const { login, isLoading } = useAuth();
   const router = useRouter();
+  const useMocks = process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,17 +34,31 @@ export default function LoginPage() {
       return;
     }
 
-    const user = getMockUserByEmail(email);
-    if (!user) {
-      setError("Invalid email or password");
-      return;
-    }
+    if (useMocks) {
+      const user = getMockUserByEmail(email);
+      if (!user) {
+        setError("Invalid email or password");
+        return;
+      }
 
-    try {
-      await login(user.role);
-      router.push("/overview");
-    } catch (err) {
-      setError("Failed to login");
+      try {
+        await login(user.role);
+        router.push("/overview");
+      } catch (err) {
+        setError("Failed to login");
+      }
+    } else {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setError(error.message || "Failed to login");
+      } else {
+        router.push("/overview");
+      }
     }
   };
 
@@ -72,7 +88,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="m@example.com"
+                placeholder={useMocks ? "m@example.com" : "name@example.com"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
@@ -94,51 +110,55 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="relative mt-6">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with (Dev Mode)
-              </span>
-            </div>
-          </div>
+          {useMocks && (
+            <>
+              <div className="relative mt-6">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    Or continue with (Dev Mode)
+                  </span>
+                </div>
+              </div>
 
-          <div className="mt-6 grid grid-cols-2 gap-2">
-            <Button
-              variant="outline"
-              onClick={() => handleQuickLogin(UserRole.GLOBAL_ADMIN)}
-              disabled={isLoading}
-              className="w-full text-xs"
-            >
-              Global Admin
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => handleQuickLogin(UserRole.SUPERVISOR)}
-              disabled={isLoading}
-              className="w-full text-xs"
-            >
-              Supervisor
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => handleQuickLogin(UserRole.LOCAL_USER)}
-              disabled={isLoading}
-              className="w-full text-xs"
-            >
-              Local User
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => handleQuickLogin(UserRole.READ_ONLY)}
-              disabled={isLoading}
-              className="w-full text-xs"
-            >
-              Read Only
-            </Button>
-          </div>
+              <div className="mt-6 grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => handleQuickLogin(UserRole.GLOBAL_ADMIN)}
+                  disabled={isLoading}
+                  className="w-full text-xs"
+                >
+                  Global Admin
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => handleQuickLogin(UserRole.SUPERVISOR)}
+                  disabled={isLoading}
+                  className="w-full text-xs"
+                >
+                  Supervisor
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => handleQuickLogin(UserRole.LOCAL_USER)}
+                  disabled={isLoading}
+                  className="w-full text-xs"
+                >
+                  Local User
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => handleQuickLogin(UserRole.READ_ONLY)}
+                  disabled={isLoading}
+                  className="w-full text-xs"
+                >
+                  Read Only
+                </Button>
+              </div>
+            </>
+          )}
         </CardContent>
         <CardFooter className="flex justify-center text-sm text-muted-foreground">
            <p>Don&apos;t have an account? Contact admin.</p>
