@@ -25,7 +25,7 @@ describe('useAuth', () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
 
     await act(async () => {
-      await result.current.login(UserRole.GLOBAL_ADMIN);
+      await result.current.devLogin(UserRole.GLOBAL_ADMIN);
     });
 
     expect(result.current.user).toEqual(getMockUserByRole(UserRole.GLOBAL_ADMIN));
@@ -35,7 +35,7 @@ describe('useAuth', () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
 
     await act(async () => {
-      await result.current.login(UserRole.GLOBAL_ADMIN);
+      await result.current.devLogin(UserRole.GLOBAL_ADMIN);
     });
 
     expect(result.current.user).not.toBeNull();
@@ -51,7 +51,7 @@ describe('useAuth', () => {
     const { result } = renderHook(() => useAuth(), { wrapper });
 
     await act(async () => {
-      await result.current.login(UserRole.SUPERVISOR);
+      await result.current.devLogin(UserRole.SUPERVISOR);
     });
 
     expect(localStorage.getItem('mock_auth_user_role')).toBe(UserRole.SUPERVISOR);
