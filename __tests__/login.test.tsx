@@ -8,7 +8,7 @@ import * as AuthProviderModule from '@/lib/auth/provider';
 interface AuthUser {
   id: string;
   email: string;
-  role: 'GLOBAL_ADMIN' | 'SUPERVISOR' | 'LOCAL_USER' | 'READ_ONLY';
+  role: 'SUPER_ADMIN' | 'GLOBAL_ADMIN' | 'SUPERVISOR' | 'LOCAL_USER' | 'READ_ONLY';
   market_id?: string;
 }
 
@@ -33,6 +33,7 @@ vi.mock('@/lib/auth/mock', () => ({
   getMockUserByEmail: vi.fn(),
   getMockUserByRole: vi.fn(),
   UserRole: {
+    SUPER_ADMIN: 'SUPER_ADMIN',
     GLOBAL_ADMIN: 'GLOBAL_ADMIN',
     SUPERVISOR: 'SUPERVISOR',
     LOCAL_USER: 'LOCAL_USER',

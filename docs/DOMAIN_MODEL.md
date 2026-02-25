@@ -19,6 +19,7 @@ generator client {
 
 /// Core Enums \[cite: 39, 60, 71, 78, 84\]  
 enum UserRole {  
+  SUPER_ADMIN
   GLOBAL\_ADMIN  
   SUPERVISOR  
   LOCAL\_USER  

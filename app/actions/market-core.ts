@@ -19,6 +19,7 @@ export const marketSchema = z.object({
 
 // Define local UserRole to verify logic independent of Prisma Enum availability in tests
 export enum UserRole {
+  SUPER_ADMIN = 'SUPER_ADMIN',
   GLOBAL_ADMIN = 'GLOBAL_ADMIN',
   SUPERVISOR = 'SUPERVISOR',
   LOCAL_USER = 'LOCAL_USER',
