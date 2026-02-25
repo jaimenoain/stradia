@@ -11,6 +11,7 @@ import {
 import { createClient } from '@/lib/supabase/server';
 import { isTenantActive } from '@/lib/auth/tenant-lockout';
 import { redirect } from 'next/navigation';
+import { signOut } from '@/app/actions/auth';
 
 export default async function DashboardLayout({
   children,
@@ -81,10 +82,12 @@ export default async function DashboardLayout({
         {/* TopNav (Header) */}
         <header className="flex h-16 items-center gap-4 border-b bg-white px-6">
           <div className="ml-auto flex items-center gap-4">
-            <Button variant="ghost" size="sm" className="gap-2">
-              <LogOut className="h-4 w-4" />
-              Logout
-            </Button>
+            <form action={signOut} className="contents">
+              <Button variant="ghost" size="sm" className="gap-2">
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </form>
           </div>
         </header>
 
