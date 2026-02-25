@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { PrismaClient, Tenant } from '@prisma/client';
+import { PrismaClient, Tenant, User, UserRole as PrismaUserRole } from '@prisma/client';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export type ActionState = {
   success: boolean;
@@ -9,6 +10,9 @@ export type ActionState = {
     active_markets_limit?: string[];
     user_seat_limit?: string[];
     ai_token_quota?: string[];
+    email?: string[];
+    password?: string[];
+    tenant_id?: string[];
   };
 };
 
@@ -67,4 +71,60 @@ export async function createCustomerCore(
       // stripe_customer_id is optional and not in input yet
     },
   });
+}
+
+export const createCustomerUserSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  tenant_id: z.string().uuid('Invalid Tenant ID'),
+});
+
+export type CreateCustomerUserInput = z.infer<typeof createCustomerUserSchema>;
+
+export async function createCustomerUserCore(
+  user: AdminCoreUser,
+  db: PrismaClient,
+  authAdmin: SupabaseClient,
+  input: CreateCustomerUserInput
+): Promise<User> {
+  // 1. Security First: Verify SUPER_ADMIN role
+  if (user.role !== UserRole.SUPER_ADMIN) {
+    throw new Error('Forbidden: Only Super Admins can create customer users');
+  }
+
+  // 2. Create User in Supabase Auth
+  const { data, error: authError } = await authAdmin.auth.admin.createUser({
+    email: input.email,
+    password: input.password,
+    email_confirm: true,
+    user_metadata: {
+      tenant_id: input.tenant_id,
+      role: 'GLOBAL_ADMIN',
+    },
+  });
+
+  if (authError || !data.user) {
+    throw new Error(`Failed to create user in Supabase: ${authError?.message}`);
+  }
+
+  const authUserId = data.user.id;
+
+  try {
+    // 3. Create User in Prisma
+    return await db.user.create({
+      data: {
+        id: authUserId,
+        email: input.email,
+        tenant_id: input.tenant_id,
+        role: PrismaUserRole.GLOBAL_ADMIN,
+        password_hash: 'managed-by-supabase', // Placeholder
+        language_preference: 'en',
+      },
+    });
+  } catch (error) {
+    // 4. Rollback: Delete user from Supabase Auth if DB creation fails
+    // We attempt to delete, but if that fails, we can't do much more than log/throw.
+    await authAdmin.auth.admin.deleteUser(authUserId);
+    throw error;
+  }
 }

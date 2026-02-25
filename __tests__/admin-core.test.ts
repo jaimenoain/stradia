@@ -1,13 +1,27 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
-import { createCustomerCore, UserRole } from '@/app/actions/admin-core';
+import { createCustomerCore, createCustomerUserCore, UserRole } from '@/app/actions/admin-core';
 import { PrismaClient } from '@prisma/client';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 // Mock Prisma Client
 const mockPrisma = {
   tenant: {
     create: vi.fn(),
   },
+  user: {
+    create: vi.fn(),
+  },
 } as unknown as PrismaClient;
+
+// Mock Supabase Admin Client
+const mockAuthAdmin = {
+  auth: {
+    admin: {
+      createUser: vi.fn(),
+      deleteUser: vi.fn(),
+    },
+  },
+} as unknown as SupabaseClient;
 
 describe('Admin Core - createCustomerCore', () => {
   const superAdminUser = {
@@ -77,5 +91,109 @@ describe('Admin Core - createCustomerCore', () => {
       .toThrow('Forbidden: Only Super Admins can create customers');
 
     expect(mockPrisma.tenant.create).not.toHaveBeenCalled();
+  });
+});
+
+describe('Admin Core - createCustomerUserCore', () => {
+  const superAdminUser = {
+    id: 'super-admin-id',
+    role: UserRole.SUPER_ADMIN,
+  };
+
+  const globalAdminUser = {
+    id: 'global-admin-id',
+    role: UserRole.GLOBAL_ADMIN,
+  };
+
+  const validInput = {
+    email: 'admin@testcorp.com',
+    password: 'password123',
+    tenant_id: 'tenant-123',
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should allow SUPER_ADMIN to create a user', async () => {
+    // Setup mocks
+    (mockAuthAdmin.auth.admin.createUser as Mock).mockResolvedValue({
+      data: { user: { id: 'auth-user-id' } },
+      error: null,
+    });
+
+    const mockUser = {
+      id: 'auth-user-id',
+      email: validInput.email,
+      role: 'GLOBAL_ADMIN',
+      tenant_id: validInput.tenant_id,
+    };
+    (mockPrisma.user.create as Mock).mockResolvedValue(mockUser);
+
+    // Execute
+    const result = await createCustomerUserCore(superAdminUser, mockPrisma, mockAuthAdmin, validInput);
+
+    // Assert
+    expect(mockAuthAdmin.auth.admin.createUser).toHaveBeenCalledWith({
+      email: validInput.email,
+      password: validInput.password,
+      email_confirm: true,
+      user_metadata: {
+        tenant_id: validInput.tenant_id,
+        role: 'GLOBAL_ADMIN',
+      },
+    });
+
+    expect(mockPrisma.user.create).toHaveBeenCalledWith({
+      data: {
+        id: 'auth-user-id',
+        email: validInput.email,
+        tenant_id: validInput.tenant_id,
+        role: 'GLOBAL_ADMIN',
+        password_hash: 'managed-by-supabase',
+        language_preference: 'en',
+      },
+    });
+
+    expect(result).toEqual(mockUser);
+  });
+
+  it('should rollback Supabase user creation if Prisma creation fails', async () => {
+    // Setup mocks
+    (mockAuthAdmin.auth.admin.createUser as Mock).mockResolvedValue({
+      data: { user: { id: 'auth-user-id' } },
+      error: null,
+    });
+
+    (mockPrisma.user.create as Mock).mockRejectedValue(new Error('DB Error'));
+
+    // Execute & Assert
+    await expect(createCustomerUserCore(superAdminUser, mockPrisma, mockAuthAdmin, validInput))
+      .rejects.toThrow('DB Error');
+
+    expect(mockAuthAdmin.auth.admin.deleteUser).toHaveBeenCalledWith('auth-user-id');
+  });
+
+  it('should throw error if Supabase creation fails', async () => {
+    // Setup mocks
+    (mockAuthAdmin.auth.admin.createUser as Mock).mockResolvedValue({
+      data: { user: null },
+      error: { message: 'Auth Error' },
+    });
+
+    // Execute & Assert
+    await expect(createCustomerUserCore(superAdminUser, mockPrisma, mockAuthAdmin, validInput))
+      .rejects.toThrow('Failed to create user in Supabase: Auth Error');
+
+    expect(mockPrisma.user.create).not.toHaveBeenCalled();
+  });
+
+  it('should THROW error if user is NOT SUPER_ADMIN', async () => {
+    // Execute & Assert
+    await expect(createCustomerUserCore(globalAdminUser, mockPrisma, mockAuthAdmin, validInput))
+      .rejects.toThrow('Forbidden: Only Super Admins can create customer users');
+
+    expect(mockAuthAdmin.auth.admin.createUser).not.toHaveBeenCalled();
+    expect(mockPrisma.user.create).not.toHaveBeenCalled();
   });
 });
