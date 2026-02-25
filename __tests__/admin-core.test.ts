@@ -19,6 +19,7 @@ const mockAuthAdmin = {
     admin: {
       createUser: vi.fn(),
       deleteUser: vi.fn(),
+      generateLink: vi.fn(),
     },
   },
 } as unknown as SupabaseClient;
@@ -155,7 +156,53 @@ describe('Admin Core - createCustomerUserCore', () => {
       },
     });
 
-    expect(result).toEqual(mockUser);
+    expect(result).toEqual({ user: mockUser, inviteLink: undefined });
+  });
+
+  it('should auto-generate password and return invite link if password is NOT provided', async () => {
+    // Setup mocks
+    (mockAuthAdmin.auth.admin.createUser as Mock).mockResolvedValue({
+      data: { user: { id: 'auth-user-id' } },
+      error: null,
+    });
+
+    (mockAuthAdmin.auth.admin.generateLink as Mock).mockResolvedValue({
+      data: { properties: { action_link: 'http://invite.link' } },
+      error: null,
+    });
+
+    const mockUser = {
+      id: 'auth-user-id',
+      email: validInput.email,
+      role: 'GLOBAL_ADMIN',
+      tenant_id: validInput.tenant_id,
+    };
+    (mockPrisma.user.create as Mock).mockResolvedValue(mockUser);
+
+    const inputNoPassword = {
+      email: validInput.email,
+      tenant_id: validInput.tenant_id,
+      // password missing
+    };
+
+    // Execute
+    const result = await createCustomerUserCore(superAdminUser, mockPrisma, mockAuthAdmin, inputNoPassword);
+
+    // Assert
+    // Check createUser called with A password (any string)
+    expect(mockAuthAdmin.auth.admin.createUser).toHaveBeenCalledWith(expect.objectContaining({
+      email: validInput.email,
+      password: expect.any(String), // Any string
+      email_confirm: true,
+    }));
+
+    // Check generateLink called
+    expect(mockAuthAdmin.auth.admin.generateLink).toHaveBeenCalledWith({
+      type: 'recovery',
+      email: validInput.email,
+    });
+
+    expect(result).toEqual({ user: mockUser, inviteLink: 'http://invite.link' });
   });
 
   it('should rollback Supabase user creation if Prisma creation fails', async () => {

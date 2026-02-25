@@ -39,7 +39,7 @@ export async function createCustomerUser(
 
   const rawData = {
     email: formData.get('email'),
-    password: formData.get('password'),
+    password: formData.get('password') || undefined,
     tenant_id: formData.get('tenant_id'),
   };
 
@@ -55,7 +55,7 @@ export async function createCustomerUser(
 
   try {
     const adminClient = createAdminClient();
-    await createCustomerUserCore(
+    const { inviteLink } = await createCustomerUserCore(
       { id: dbUser.id, role: dbUser.role },
       prisma,
       adminClient,
@@ -63,7 +63,13 @@ export async function createCustomerUser(
     );
 
     revalidatePath('/admin/customers');
-    return { success: true, message: 'Customer user created successfully' };
+    return {
+      success: true,
+      message: inviteLink
+        ? 'Customer user created. Invite link generated.'
+        : 'Customer user created successfully',
+      inviteLink,
+    };
   } catch (error) {
     const message =
       error instanceof Error ? error.message : 'Failed to create customer user';
