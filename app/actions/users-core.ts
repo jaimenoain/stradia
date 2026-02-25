@@ -119,3 +119,43 @@ export async function updateUserRoleAndMarketsCore(
     return user;
   });
 }
+
+export async function deleteUserCore(
+  prisma: PrismaClient,
+  tenantId: string,
+  userId: string
+) {
+  return await prisma.$transaction(async (tx) => {
+    // 1. Fetch user to verify existence and role
+    const user = await tx.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (user.tenant_id !== tenantId) {
+      throw new Error('User not found in this tenant');
+    }
+
+    // 2. Last Admin Rule
+    if (user.role === 'GLOBAL_ADMIN') {
+      const adminCount = await tx.user.count({
+        where: {
+          tenant_id: tenantId,
+          role: 'GLOBAL_ADMIN',
+        },
+      });
+
+      if (adminCount <= 1) {
+        throw new Error('Cannot delete the last GLOBAL_ADMIN');
+      }
+    }
+
+    // 3. Delete user
+    return await tx.user.delete({
+      where: { id: userId },
+    });
+  });
+}

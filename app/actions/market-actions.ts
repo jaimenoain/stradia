@@ -38,18 +38,19 @@ export async function createMarketAction(prevState: ActionState, formData: FormD
     }
   }
 
-  // Pass dbUser.role as string to satisfy the core function signature which accepts string for compatibility
-  const result = await createMarketCore(
-    { id: user.id, tenant_id: dbUser.tenant_id, role: dbUser.role as unknown as string },
-    prisma,
-    validatedFields.data
-  )
+  try {
+    await createMarketCore(
+      { id: user.id, tenant_id: dbUser.tenant_id, role: dbUser.role as unknown as string },
+      prisma,
+      validatedFields.data
+    )
 
-  if (result.success) {
     revalidatePath('/settings')
+    return { success: true, message: 'Market created successfully' }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to create market';
+    return { success: false, message }
   }
-
-  return result
 }
 
 export async function deleteMarketAction(prevState: ActionState, formData: FormData): Promise<ActionState> {
@@ -75,15 +76,17 @@ export async function deleteMarketAction(prevState: ActionState, formData: FormD
     return { success: false, message: 'User not found in database' }
   }
 
-  const result = await deleteMarketCore(
-    { id: user.id, tenant_id: dbUser.tenant_id, role: dbUser.role as unknown as string },
-    prisma,
-    marketId
-  )
+  try {
+    await deleteMarketCore(
+      { id: user.id, tenant_id: dbUser.tenant_id, role: dbUser.role as unknown as string },
+      prisma,
+      marketId
+    )
 
-  if (result.success) {
     revalidatePath('/settings')
+    return { success: true, message: 'Market deleted successfully' }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to delete market';
+    return { success: false, message }
   }
-
-  return result
 }
