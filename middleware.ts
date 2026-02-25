@@ -14,5 +14,6 @@ export const config = {
      * by omission, satisfying the strict negative constraint.
      */
     '/dashboard/:path*',
+    '/api/:path*',
   ],
 }

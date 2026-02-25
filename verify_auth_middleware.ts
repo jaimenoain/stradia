@@ -14,6 +14,25 @@ const createMockClient = (user: any | null) => {
         // Mock sign out
       },
     },
+    from: (table: string) => {
+      // Mock Tenant check (assume active)
+      if (table === 'Tenant') {
+         return {
+           select: (cols: string) => ({
+             eq: (col: string, val: string) => ({
+               single: async () => ({ data: { is_active: true }, error: null })
+             })
+           })
+         };
+      }
+      return {
+        select: () => ({
+          eq: () => ({
+            single: async () => ({ data: null, error: null })
+          })
+        })
+      };
+    }
   };
 };
 
