@@ -1,10 +1,9 @@
-
-import { describe, test, expect, vi } from 'vitest';
+import { describe, test, expect } from 'vitest';
 import { NextRequest } from 'next/server';
 import { updateSession } from '../lib/supabase/middleware';
 
 // Mock Supabase Client Factory
-const createMockClient = (user: any | null, tenantIsActive: boolean = true) => {
+const createMockClient = (user: { app_metadata: { tenant_id: string } } | null, tenantIsActive: boolean = true) => {
   return {
     auth: {
       getUser: async () => ({
@@ -18,7 +17,7 @@ const createMockClient = (user: any | null, tenantIsActive: boolean = true) => {
     from: (table: string) => {
       if (table === 'Tenant') {
         return {
-          select: (columns: string) => ({
+          select: (_columns: string) => ({
             eq: (column: string, value: string) => ({
               single: async () => {
                  if (!user) return { data: null, error: { message: 'No user' } };
