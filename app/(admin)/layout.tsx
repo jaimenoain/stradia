@@ -37,7 +37,7 @@ export default async function AdminLayout({
           </div>
           {/* Nav */}
           <nav className="flex flex-col gap-2 p-4">
-            <Link href="/admin/customers" className="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
+            <Link href="/customers" className="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
                <Users className="h-4 w-4" />
                Customers
             </Link>
