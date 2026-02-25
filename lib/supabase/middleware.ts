@@ -85,5 +85,21 @@ export async function updateSession(request: NextRequest, testClient?: any) {
       });
   }
 
+  // 3. Tenant Lockout Check
+  if (user && user.app_metadata?.tenant_id) {
+    const { data: tenant } = await supabase
+      .from('Tenant')
+      .select('is_active')
+      .eq('id', user.app_metadata.tenant_id as string)
+      .single()
+
+    // Default Deny: If tenant is missing or not explicitly active, block access.
+    if (!tenant || !tenant.is_active) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/subscription-suspended'
+      return NextResponse.redirect(url)
+    }
+  }
+
   return supabaseResponse
 }
