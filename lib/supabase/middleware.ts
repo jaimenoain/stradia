@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function updateSession(request: NextRequest, testClient?: any) {
   let supabaseResponse = NextResponse.next({
     request,

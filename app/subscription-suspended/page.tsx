@@ -16,7 +16,7 @@ export default function SubscriptionSuspendedPage() {
         </CardHeader>
         <CardContent>
           <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Your tenant's subscription has been suspended due to payment issues or inactivity.
+            Your tenant&apos;s subscription has been suspended due to payment issues or inactivity.
             Please contact support to reactivate your account.
           </p>
           <div className="flex justify-end gap-2">
