@@ -86,6 +86,7 @@ export async function updateSession(request: NextRequest, testClient?: any) {
   }
 
   // 3. Tenant Lockout Check
+  // Enforces enterprise lockout for deactivated tenants on all protected routes (Dashboard & API)
   if (user && user.app_metadata?.tenant_id) {
     const { data: tenant } = await supabase
       .from('Tenant')

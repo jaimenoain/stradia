@@ -8,12 +8,26 @@ import {
   LogOut,
   Users
 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/server';
+import { isTenantActive } from '@/lib/auth/tenant-lockout';
+import { redirect } from 'next/navigation';
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Tenant Lockout Check
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (user?.app_metadata?.tenant_id) {
+    const isActive = await isTenantActive(user.app_metadata.tenant_id as string);
+    if (!isActive) {
+      redirect('/subscription-suspended');
+    }
+  }
+
   return (
     <div className="flex min-h-screen">
       {/* Sidebar (Left) */}
