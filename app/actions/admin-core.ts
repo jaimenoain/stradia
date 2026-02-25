@@ -34,6 +34,7 @@ export type AdminCoreUser = {
 
 export const createCustomerSchema = z.object({
   name: z.string().min(1, 'Company Name is required'),
+  slug: z.string().optional(),
   // Optional limits with defaults
   active_markets_limit: z.number().int().min(1).optional().default(5),
   user_seat_limit: z.number().int().min(1).optional().default(10),
