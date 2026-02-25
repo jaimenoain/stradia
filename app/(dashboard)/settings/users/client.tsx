@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import {
   Table,
   TableBody,
@@ -19,7 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { MoreHorizontal, Edit, UserPlus, Trash } from "lucide-react"
+import { MoreHorizontal, Edit, UserPlus, Trash, ChevronLeft, ChevronRight } from "lucide-react"
 import { InviteUserDialog } from "./invite-dialog"
 import { EditUserSheet } from "./edit-sheet"
 import { User, Market, UserRole } from "./types"
@@ -28,17 +29,26 @@ interface UserDirectoryClientProps {
   users: User[]
   availableMarkets: Market[]
   currentUserRole: UserRole
+  totalCount: number
+  currentPage: number
+  pageSize: number
 }
 
 export function UserDirectoryClient({
   users,
   availableMarkets,
-  currentUserRole
+  currentUserRole,
+  totalCount,
+  currentPage,
+  pageSize
 }: UserDirectoryClientProps) {
   const [isInviteOpen, setIsInviteOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   const handleEdit = (user: User) => {
     setSelectedUser(user)
@@ -50,6 +60,17 @@ export function UserDirectoryClient({
     console.log("Delete user:", user.id)
     alert("Delete functionality coming soon.")
   }
+
+  const handlePageChange = (newPage: number) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set("page", newPage.toString())
+
+    startTransition(() => {
+        router.push(`${pathname}?${params.toString()}`)
+    })
+  }
+
+  const totalPages = Math.ceil(totalCount / pageSize)
 
   return (
     <div className="w-full space-y-4">
@@ -137,6 +158,31 @@ export function UserDirectoryClient({
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage <= 1 || isPending}
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Previous
+        </Button>
+        <span className="text-sm text-muted-foreground">
+          Page {currentPage} of {Math.max(1, totalPages)}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage >= totalPages || isPending}
+        >
+          Next
+          <ChevronRight className="h-4 w-4 ml-1" />
+        </Button>
       </div>
 
       <InviteUserDialog
