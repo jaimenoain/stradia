@@ -1,10 +1,12 @@
 import { z } from 'zod';
+import crypto from 'crypto';
 import { PrismaClient, Tenant, User, UserRole as PrismaUserRole } from '@prisma/client';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 export type ActionState = {
   success: boolean;
   message: string;
+  inviteLink?: string;
   errors?: {
     name?: string[];
     active_markets_limit?: string[];
@@ -75,7 +77,7 @@ export async function createCustomerCore(
 
 export const createCustomerUserSchema = z.object({
   email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  password: z.string().min(8, 'Password must be at least 8 characters').optional(),
   tenant_id: z.string().uuid('Invalid Tenant ID'),
 });
 
@@ -86,16 +88,19 @@ export async function createCustomerUserCore(
   db: PrismaClient,
   authAdmin: SupabaseClient,
   input: CreateCustomerUserInput
-): Promise<User> {
+): Promise<{ user: User; inviteLink?: string }> {
   // 1. Security First: Verify SUPER_ADMIN role
   if (user.role !== UserRole.SUPER_ADMIN) {
     throw new Error('Forbidden: Only Super Admins can create customer users');
   }
 
+  const providedPassword = input.password?.trim() ? input.password : undefined;
+  const password = providedPassword || crypto.randomBytes(16).toString('hex');
+
   // 2. Create User in Supabase Auth
-  const { data, error: authError } = await authAdmin.auth.admin.createUser({
+  const { data: authData, error: authError } = await authAdmin.auth.admin.createUser({
     email: input.email,
-    password: input.password,
+    password,
     email_confirm: true,
     user_metadata: {
       tenant_id: input.tenant_id,
@@ -103,15 +108,32 @@ export async function createCustomerUserCore(
     },
   });
 
-  if (authError || !data.user) {
+  if (authError || !authData.user) {
     throw new Error(`Failed to create user in Supabase: ${authError?.message}`);
   }
 
-  const authUserId = data.user.id;
+  const authUserId = authData.user.id;
+  let inviteLink: string | undefined;
+
+  // 3. Generate Invite/Recovery Link if password was auto-generated
+  if (!providedPassword) {
+    const { data: linkData, error: linkError } = await authAdmin.auth.admin.generateLink({
+      type: 'recovery',
+      email: input.email,
+    });
+
+    if (linkError) {
+      // Rollback: Delete user from Supabase Auth
+      await authAdmin.auth.admin.deleteUser(authUserId);
+      throw new Error(`Failed to generate invite link: ${linkError.message}`);
+    }
+
+    inviteLink = linkData.properties?.action_link;
+  }
 
   try {
-    // 3. Create User in Prisma
-    return await db.user.create({
+    // 4. Create User in Prisma
+    const newUser = await db.user.create({
       data: {
         id: authUserId,
         email: input.email,
@@ -121,8 +143,10 @@ export async function createCustomerUserCore(
         language_preference: 'en',
       },
     });
+
+    return { user: newUser, inviteLink };
   } catch (error) {
-    // 4. Rollback: Delete user from Supabase Auth if DB creation fails
+    // 5. Rollback: Delete user from Supabase Auth if DB creation fails
     // We attempt to delete, but if that fails, we can't do much more than log/throw.
     await authAdmin.auth.admin.deleteUser(authUserId);
     throw error;
