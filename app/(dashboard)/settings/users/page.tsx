@@ -5,7 +5,11 @@ import { UserRole } from '@prisma/client'
 import { UserDirectoryClient } from './client'
 import { User as FrontendUser, UserRole as FrontendUserRole } from './types'
 
-export default async function UserDirectoryPage() {
+interface PageProps {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
+
+export default async function UserDirectoryPage({ searchParams }: PageProps) {
   const supabase = await createClient()
   const { data: { user: authUser }, error } = await supabase.auth.getUser()
 
@@ -35,18 +39,34 @@ export default async function UserDirectoryPage() {
     )
   }
 
-  // Fetch all users for the tenant
-  const users = await prisma.user.findMany({
-    where: { tenant_id: currentUser.tenant_id },
-    include: {
-      markets: {
-        include: {
-          market: true,
+  // Parse Pagination Params
+  const params = await searchParams
+  const page = typeof params.page === 'string' ? parseInt(params.page) : 1
+  const pageSize = typeof params.pageSize === 'string' ? parseInt(params.pageSize) : 10
+
+  const currentPage = isNaN(page) || page < 1 ? 1 : page
+  const limit = isNaN(pageSize) || pageSize < 1 ? 10 : pageSize
+  const skip = (currentPage - 1) * limit
+
+  // Fetch users with pagination
+  const [users, totalCount] = await Promise.all([
+    prisma.user.findMany({
+      where: { tenant_id: currentUser.tenant_id },
+      include: {
+        markets: {
+          include: {
+            market: true,
+          },
         },
       },
-    },
-    orderBy: { email: 'asc' },
-  })
+      orderBy: { email: 'asc' },
+      skip: skip,
+      take: limit,
+    }),
+    prisma.user.count({
+      where: { tenant_id: currentUser.tenant_id },
+    }),
+  ])
 
   // Fetch all active markets for the tenant (for assignment)
   const markets = await prisma.market.findMany({
@@ -67,6 +87,9 @@ export default async function UserDirectoryPage() {
           users={users as unknown as FrontendUser[]}
           availableMarkets={markets}
           currentUserRole={currentUser.role as unknown as FrontendUserRole}
+          totalCount={totalCount}
+          currentPage={currentPage}
+          pageSize={limit}
         />
       </div>
     </div>
