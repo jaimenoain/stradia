@@ -114,7 +114,7 @@ if (!enumMatch) {
 } else {
   console.log(`✅ Enum found: ${enumName}`);
   const enumBody = enumMatch[1];
-  ['GLOBAL_ADMIN', 'SUPERVISOR', 'LOCAL_USER', 'READ_ONLY'].forEach(val => {
+  ['SUPER_ADMIN', 'GLOBAL_ADMIN', 'SUPERVISOR', 'LOCAL_USER', 'READ_ONLY'].forEach(val => {
     if (!enumBody.includes(val)) {
       console.error(`❌ Missing enum value in ${enumName}: ${val}`);
       hasErrors = true;

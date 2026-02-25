@@ -1,5 +1,6 @@
 // Define UserRole manually to avoid importing @prisma/client in Client Components
 export enum UserRole {
+  SUPER_ADMIN = 'SUPER_ADMIN',
   GLOBAL_ADMIN = 'GLOBAL_ADMIN',
   SUPERVISOR = 'SUPERVISOR',
   LOCAL_USER = 'LOCAL_USER',

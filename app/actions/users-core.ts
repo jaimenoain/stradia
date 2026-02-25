@@ -2,7 +2,7 @@ import { PrismaClient, UserRole } from '@prisma/client';
 
 export interface ProvisionUserDTO {
   email: string;
-  role: 'GLOBAL_ADMIN' | 'SUPERVISOR' | 'LOCAL_USER' | 'READ_ONLY';
+  role: 'SUPER_ADMIN' | 'GLOBAL_ADMIN' | 'SUPERVISOR' | 'LOCAL_USER' | 'READ_ONLY';
   market_ids: string[]; // Required if role is SUPERVISOR or LOCAL_USER
 }
 
@@ -24,7 +24,7 @@ export async function provisionUserCore(
   // I will stick to the prompt: only enforce for LOCAL_USER and SUPERVISOR.
   // But for GLOBAL_ADMIN, force empty.
 
-  const marketIds = dto.role === 'GLOBAL_ADMIN' ? [] : dto.market_ids || [];
+  const marketIds = (dto.role === 'GLOBAL_ADMIN' || dto.role === 'SUPER_ADMIN') ? [] : dto.market_ids || [];
 
   return await prisma.$transaction(async (tx) => {
     // 1. Create User
@@ -63,7 +63,7 @@ export async function updateUserRoleAndMarketsCore(
     throw new Error('User role requires at least one market assignment.');
   }
 
-  const marketIds = dto.role === 'GLOBAL_ADMIN' ? [] : dto.market_ids || [];
+  const marketIds = (dto.role === 'GLOBAL_ADMIN' || dto.role === 'SUPER_ADMIN') ? [] : dto.market_ids || [];
 
   return await prisma.$transaction(async (tx) => {
     // Check if user exists and is in tenant

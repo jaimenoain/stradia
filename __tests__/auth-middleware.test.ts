@@ -1,9 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { updateSession } from '../lib/supabase/middleware';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 
 // Mock Supabase Client
-const createMockClient = (user: any | null) => {
+const createMockClient = (user: Record<string, unknown> | null) => {
   return {
     auth: {
       getUser: async () => ({
