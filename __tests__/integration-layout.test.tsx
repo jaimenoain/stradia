@@ -25,6 +25,40 @@ vi.mock('next/navigation', () => ({
   }),
   usePathname: () => '/',
   useSearchParams: () => new URLSearchParams(),
+  redirect: vi.fn(),
+}));
+
+// Mock Supabase Server Client
+vi.mock('@/lib/supabase/server', () => ({
+  createClient: async () => ({
+    auth: {
+      getUser: async () => ({
+        data: {
+          user: {
+            app_metadata: {
+              tenant_id: 'tenant-123'
+            }
+          }
+        }
+      })
+    }
+  })
+}));
+
+// Mock Supabase Client (Browser)
+vi.mock('@/lib/supabase/client', () => ({
+  createClient: () => ({
+    auth: {
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+      signInWithPassword: () => {},
+      signOut: () => {},
+    }
+  })
+}));
+
+// Mock Tenant Lockout
+vi.mock('@/lib/auth/tenant-lockout', () => ({
+  isTenantActive: vi.fn().mockResolvedValue(true)
 }));
 
 describe('Dashboard Integration Check', () => {
@@ -59,11 +93,14 @@ describe('Dashboard Integration Check', () => {
     // Enable mocks
     process.env.NEXT_PUBLIC_USE_MOCKS = 'true';
 
+    // Await the async component to get the React Element
+    const LayoutComponent = await DashboardLayout({
+      children: <div data-testid="dashboard-content">Protected Content</div>
+    });
+
     render(
       <Providers>
-        <DashboardLayout>
-          <div data-testid="dashboard-content">Protected Content</div>
-        </DashboardLayout>
+        {LayoutComponent}
       </Providers>
     );
 
@@ -87,11 +124,14 @@ describe('Dashboard Integration Check', () => {
     // Disable mocks
     process.env.NEXT_PUBLIC_USE_MOCKS = 'false';
 
+    // Await the async component to get the React Element
+    const LayoutComponent = await DashboardLayout({
+      children: <div data-testid="dashboard-content">Content</div>
+    });
+
     render(
       <Providers>
-        <DashboardLayout>
-          <div data-testid="dashboard-content">Content</div>
-        </DashboardLayout>
+        {LayoutComponent}
       </Providers>
     );
 
