@@ -5,7 +5,8 @@ import {
   Layers,
   Settings,
   LineChart,
-  LogOut
+  LogOut,
+  Users
 } from 'lucide-react';
 
 export default function DashboardLayout({
@@ -43,6 +44,13 @@ export default function DashboardLayout({
           >
             <Settings className="h-4 w-4" />
             Tenant Settings
+          </Link>
+          <Link
+            href="/settings/users"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:bg-muted"
+          >
+            <Users className="h-4 w-4" />
+            User Directory
           </Link>
           <Link
             href="/markets/123/board"

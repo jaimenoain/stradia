@@ -1,0 +1,233 @@
+"use client"
+
+import { useEffect, useTransition } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import { useRouter } from "next/navigation"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+} from "@/components/ui/sheet"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { useToast } from "@/hooks/use-toast"
+import { updateUserRoleAndMarkets } from "@/app/actions/users"
+import { User, Market, UserRole } from "./types"
+
+const editUserSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  role: z.nativeEnum(UserRole),
+  market_ids: z.array(z.string()).optional(),
+}).refine((data) => {
+  if ((data.role === 'LOCAL_USER' || data.role === 'SUPERVISOR') && (!data.market_ids || data.market_ids.length === 0)) {
+    return false
+  }
+  return true
+}, {
+  message: "At least one market must be selected for this role",
+  path: ["market_ids"],
+})
+
+type EditUserFormValues = z.infer<typeof editUserSchema>
+
+export function EditUserSheet({
+  open,
+  onOpenChange,
+  user,
+  availableMarkets,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  user: User
+  availableMarkets: Market[]
+}) {
+  const { toast } = useToast()
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+
+  const form = useForm<EditUserFormValues>({
+    resolver: zodResolver(editUserSchema),
+    defaultValues: {
+      email: user.email,
+      role: user.role,
+      market_ids: user.markets.map(m => m.market.id),
+    },
+  })
+
+  // Update form values when user changes
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        email: user.email,
+        role: user.role,
+        market_ids: user.markets.map(m => m.market.id),
+      })
+    }
+  }, [user, open, form])
+
+  const role = form.watch("role")
+  const showMarkets = role === 'LOCAL_USER' || role === 'SUPERVISOR'
+
+  const onSubmit = (data: EditUserFormValues) => {
+    startTransition(async () => {
+      try {
+        await updateUserRoleAndMarkets(user.id, {
+          email: data.email,
+          role: data.role,
+          market_ids: data.market_ids || [],
+        })
+
+        toast({
+          title: "Success",
+          description: "User updated successfully.",
+        })
+
+        onOpenChange(false)
+        router.refresh()
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to update user.",
+          variant: "destructive",
+        })
+      }
+    })
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="sm:max-w-[425px]">
+        <SheetHeader>
+          <SheetTitle>Edit User</SheetTitle>
+          <SheetDescription>
+            Update user details and access.
+          </SheetDescription>
+        </SheetHeader>
+        <div className="py-4">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="user@example.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="role"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.values(UserRole).map((role) => (
+                          <SelectItem key={role} value={role}>
+                            {role}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {showMarkets && (
+                <FormField
+                  control={form.control}
+                  name="market_ids"
+                  render={() => (
+                    <FormItem>
+                      <div className="mb-4">
+                        <FormLabel className="text-base">Markets</FormLabel>
+                        <FormDescription>
+                          Select the markets this user can access.
+                        </FormDescription>
+                      </div>
+                      <div className="max-h-[200px] overflow-y-auto space-y-2 border p-2 rounded-md">
+                        {availableMarkets.map((market) => (
+                          <FormField
+                            key={market.id}
+                            control={form.control}
+                            name="market_ids"
+                            render={({ field }) => {
+                              return (
+                                <FormItem
+                                  key={market.id}
+                                  className="flex flex-row items-start space-x-3 space-y-0"
+                                >
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value?.includes(market.id)}
+                                      onCheckedChange={(checked) => {
+                                        return checked
+                                          ? field.onChange([...(field.value || []), market.id])
+                                          : field.onChange(
+                                              field.value?.filter(
+                                                (value) => value !== market.id
+                                              )
+                                            )
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="font-normal">
+                                    {market.name}
+                                  </FormLabel>
+                                </FormItem>
+                              )
+                            }}
+                          />
+                        ))}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              <SheetFooter>
+                <Button type="submit" disabled={isPending}>
+                  {isPending ? "Saving..." : "Save Changes"}
+                </Button>
+              </SheetFooter>
+            </form>
+          </Form>
+        </div>
+      </SheetContent>
+    </Sheet>
+  )
+}
