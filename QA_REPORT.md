@@ -52,3 +52,30 @@ The implementation is correct and passes all QA and regression checks.
 
 **Conclusion:**
 Phase 1 implementation is stable and fully synchronized with documentation.
+
+# QA Report: Tenant Lockout Guardrails (Task 3.5)
+
+**Date:** 2026-02-24
+
+**Execution Strategy (Strict Validation):**
+1. **Validation Script:** `npx vitest run __tests__/tenant-lockout.test.ts`
+2. **Regression Check:** `npm run build`
+
+**1. Verification Output:**
+```
+ RUN  v4.0.18 /app
+
+  ✓ __tests__/tenant-lockout.test.ts (2 tests) 13ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  04:35:16
+   Duration  1.06s
+```
+
+**2. Regression Check Results:**
+- **Build:** ✅ Passed (`npm run build`).
+- **ESLint**: ✅ Passed (Fixed strict type errors in `lib/supabase/middleware.ts`, `app/subscription-suspended/page.tsx`, `app/(auth)/login/page.tsx`, and `lib/auth/tenant-lockout.ts`).
+
+**Conclusion:**
+The Tenant Lockout mechanism correctly redirects inactive tenants to the suspension page and allows active tenants to access the dashboard. The application builds successfully with no linting errors.

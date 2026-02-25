@@ -10,6 +10,7 @@ import type { PrismaClient } from '@prisma/client';
  */
 export async function isTenantActive(
   tenantId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   db: PrismaClient | any = prisma
 ): Promise<boolean> {
   if (!tenantId) return false;
@@ -21,7 +22,7 @@ export async function isTenantActive(
     });
 
     return tenant?.is_active ?? false;
-  } catch (error) {
+  } catch {
     // Fail closed (deny access) on error
     return false;
   }

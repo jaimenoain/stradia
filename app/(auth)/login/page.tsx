@@ -20,7 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 // Data Contract: LoginSchema
-export const LoginSchema = z.object({
+const LoginSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   password: z.string().min(8, { message: "Password must be at least 8 characters" })
 });
@@ -67,7 +67,7 @@ export default function LoginPage() {
       } else {
          setAuthError("Authentication Failed: Invalid email or password");
       }
-    } catch (err: any) {
+    } catch {
       setAuthError("Authentication Failed: Invalid email or password");
     }
   };
@@ -81,7 +81,7 @@ export default function LoginPage() {
       } else {
         setAuthError("Failed to login");
       }
-    } catch (err) {
+    } catch {
       setAuthError("Failed to login");
     }
   };
