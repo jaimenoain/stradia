@@ -17,6 +17,7 @@ export const config = {
     '/overview/:path*',
     '/strategies/:path*',
     '/markets/:path*',
+    '/settings/:path*',
     '/api/:path*',
   ],
 }
