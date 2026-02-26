@@ -103,6 +103,7 @@ export async function createCustomer(
   // Parse fields. Handle optional numeric fields by converting strings to numbers if present.
   const rawData = {
     name: formData.get('name'),
+    slug: formData.get('slug'),
     active_markets_limit: formData.get('active_markets_limit')
       ? Number(formData.get('active_markets_limit'))
       : undefined,

@@ -9,6 +9,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Building2, Plus } from 'lucide-react';
+import { CreateCustomerSheet } from './create-customer-sheet';
 
 export default async function CustomersPage() {
   const tenants = await prisma.tenant.findMany({
@@ -33,10 +34,12 @@ export default async function CustomersPage() {
           <p className="mb-4 mt-2 text-sm text-slate-500">
             You haven&apos;t added any customers to the platform yet.
           </p>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Customer
-          </Button>
+          <CreateCustomerSheet>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Customer
+            </Button>
+          </CreateCustomerSheet>
         </div>
       </div>
     );
@@ -52,10 +55,12 @@ export default async function CustomersPage() {
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Customer
-          </Button>
+          <CreateCustomerSheet>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Customer
+            </Button>
+          </CreateCustomerSheet>
         </div>
       </div>
       <div className="rounded-md border bg-white">
