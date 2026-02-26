@@ -132,7 +132,7 @@ export async function createCustomer(
       validatedFields.data
     );
 
-    revalidatePath('/admin/customers');
+    revalidatePath('/customers');
     revalidatePath('/'); // Revalidate root just in case
     return { success: true, message: 'Customer created successfully' };
   } catch (error) {

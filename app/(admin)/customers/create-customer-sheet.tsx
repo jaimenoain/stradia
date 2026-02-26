@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -24,6 +25,7 @@ const initialState: ActionState = {
 
 export function CreateCustomerSheet({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
   const [state, formAction, isPending] = useActionState(createCustomer, initialState);
   const { toast } = useToast();
   const [name, setName] = useState('');
@@ -33,9 +35,11 @@ export function CreateCustomerSheet({ children }: { children: React.ReactNode })
   useEffect(() => {
     if (state.success) {
       toast({
+        variant: 'success',
         title: 'Success',
         description: state.message,
       });
+      router.refresh();
       setOpen(false);
       // Reset form state
       setName('');
@@ -48,7 +52,7 @@ export function CreateCustomerSheet({ children }: { children: React.ReactNode })
         description: state.message,
       });
     }
-  }, [state, toast]);
+  }, [state, toast, router]);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value;

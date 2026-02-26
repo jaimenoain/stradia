@@ -2,6 +2,14 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { CreateCustomerSheet } from '@/app/(admin)/customers/create-customer-sheet';
 
+// Mock useRouter
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    refresh: vi.fn(),
+    push: vi.fn(),
+  }),
+}));
+
 // Mock useToast
 vi.mock('@/hooks/use-toast', () => ({
   useToast: () => ({
