@@ -6,7 +6,8 @@ import {
   Settings,
   LineChart,
   LogOut,
-  Users
+  Users,
+  Shield
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { isTenantActive } from '@/lib/auth/tenant-lockout';
@@ -74,6 +75,15 @@ export default async function DashboardLayout({
             <LineChart className="h-4 w-4" />
             Mock Market Board
           </Link>
+          {user?.app_metadata?.role === 'SUPER_ADMIN' && (
+            <Link
+              href="/admin/customers"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:bg-muted"
+            >
+              <Shield className="h-4 w-4" />
+              Super Admin
+            </Link>
+          )}
         </nav>
       </aside>
 

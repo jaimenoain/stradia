@@ -21,6 +21,12 @@ export const MOCK_USERS: MockSessionUser[] = [
     market_id: 'market-123',
   },
   {
+    id: 'user-super-admin',
+    tenant_id: 'tenant-1',
+    email: 'superadmin@stradia.io',
+    role: UserRole.SUPER_ADMIN,
+  },
+  {
     id: 'user-read-only',
     tenant_id: 'tenant-1',
     email: 'readonly@stradia.io',

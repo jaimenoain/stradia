@@ -1,0 +1,32 @@
+
+> temp_app@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.12
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.0.2:3000
+
+ ✓ Starting...
+ ✓ Ready in 2.2s
+ ○ Compiling /login ...
+ ✓ Compiled /login in 8.2s (1139 modules)
+ GET /login 200 in 9643ms
+ ○ Compiling /middleware ...
+ ✓ Compiled /middleware in 839ms (165 modules)
+ GET /login 200 in 46ms
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (133kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ✓ Compiled in 418ms (518 modules)
+ ✓ Compiled in 339ms (518 modules)
+ GET /login 200 in 186ms
+ GET /login 200 in 39ms
+ ✓ Compiled in 300ms (518 modules)
+ ✓ Compiled in 532ms (518 modules)
+ GET /login 200 in 138ms
+ ✓ Compiled in 242ms (518 modules)
+ GET /login 200 in 62ms
+ GET /login 200 in 39ms
+ ✓ Compiled in 257ms (518 modules)
+ ✓ Compiled in 238ms (518 modules)
+ GET /login 200 in 158ms
+ GET /login 200 in 41ms
+ ✓ Compiled in 244ms (518 modules)
