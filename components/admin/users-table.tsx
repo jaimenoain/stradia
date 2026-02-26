@@ -7,9 +7,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import Link from 'next/link';
 import { User, Tenant } from '@prisma/client';
 
 type UserWithTenant = User & {
@@ -18,19 +15,15 @@ type UserWithTenant = User & {
 
 interface UsersTableProps {
   users: UserWithTenant[];
+  action?: React.ReactNode;
 }
 
-export function UsersTable({ users }: UsersTableProps) {
+export function UsersTable({ users, action }: UsersTableProps) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Global Users</h1>
-        <Button asChild>
-          <Link href="#">
-            <Plus className="mr-2 h-4 w-4" />
-            Add User
-          </Link>
-        </Button>
+        {action}
       </div>
 
       <div className="rounded-md border bg-white shadow-sm">
