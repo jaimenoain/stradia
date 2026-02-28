@@ -24,14 +24,42 @@ export async function createCustomerUser(
     error: authError,
   } = await supabase.auth.getUser();
 
-  if (authError || !user) {
+  const useMocks = process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
+
+  let dbUser: { id: string; role: string } | null = null;
+  let userId = user?.id;
+
+  if (useMocks && !user) {
+    const { cookies } = await import('next/headers');
+    const cookieStore = await cookies();
+    const mockRole = cookieStore.get('mock_role')?.value;
+    if (mockRole) {
+       userId = 'mock-user-id';
+       dbUser = { id: userId, role: mockRole };
+    }
+  }
+
+  if ((authError || !user) && !dbUser) {
     return { success: false, message: 'Unauthorized' };
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { id: true, role: true },
-  });
+  if (!dbUser && userId) {
+      dbUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, role: true },
+      });
+  }
+
+  if (!dbUser) {
+    if (useMocks) {
+         const { cookies } = await import('next/headers');
+         const cookieStore = await cookies();
+         const mockRole = cookieStore.get('mock_role')?.value;
+         if (mockRole) {
+             dbUser = { id: 'mock-user-id', role: mockRole };
+         }
+    }
+  }
 
   if (!dbUser) {
     return { success: false, message: 'User not found in database' };
@@ -51,6 +79,14 @@ export async function createCustomerUser(
       message: 'Validation failed',
       errors: validatedFields.error.flatten().fieldErrors as ActionState['errors'],
     };
+  }
+
+  if (useMocks) {
+      return {
+          success: true,
+          message: 'User created successfully! (Mock)',
+          inviteLink: 'https://mock.stradia.io/invite?token=12345'
+      };
   }
 
   try {
@@ -87,14 +123,42 @@ export async function createCustomer(
     error: authError,
   } = await supabase.auth.getUser();
 
-  if (authError || !user) {
+  const useMocks = process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
+
+  let dbUser: { id: string; role: string } | null = null;
+  let userId = user?.id;
+
+  if (useMocks && !user) {
+    const { cookies } = await import('next/headers');
+    const cookieStore = await cookies();
+    const mockRole = cookieStore.get('mock_role')?.value;
+    if (mockRole) {
+       userId = 'mock-user-id';
+       dbUser = { id: userId, role: mockRole };
+    }
+  }
+
+  if ((authError || !user) && !dbUser) {
     return { success: false, message: 'Unauthorized' };
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { id: true, role: true },
-  });
+  if (!dbUser && userId) {
+      dbUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, role: true },
+      });
+  }
+
+  if (!dbUser) {
+    if (useMocks) {
+         const { cookies } = await import('next/headers');
+         const cookieStore = await cookies();
+         const mockRole = cookieStore.get('mock_role')?.value;
+         if (mockRole) {
+             dbUser = { id: 'mock-user-id', role: mockRole };
+         }
+    }
+  }
 
   if (!dbUser) {
     return { success: false, message: 'User not found in database' };
@@ -123,6 +187,10 @@ export async function createCustomer(
       message: 'Validation failed',
       errors: validatedFields.error.flatten().fieldErrors as ActionState['errors'],
     };
+  }
+
+  if (useMocks) {
+      return { success: true, message: 'Customer created successfully (Mock)' };
   }
 
   try {

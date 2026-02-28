@@ -32,6 +32,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const storedUser = getMockUserByRole(storedRole as UserRole);
         if (storedUser) {
           setUser(storedUser);
+          // Also set a mock cookie for middleware to see "something" if needed
+          document.cookie = `mock_role=${storedRole}; path=/`;
         }
       }
       setIsLoading(false);
@@ -74,6 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (mockUser) {
         setUser(mockUser);
         localStorage.setItem(STORAGE_KEY, mockUser.role);
+        document.cookie = `mock_role=${mockUser.role}; path=/`;
         setIsLoading(false);
         return mockUser;
       } else {
@@ -112,10 +115,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Simulate network delay
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      const mockUser = getMockUserByRole(role);
+      let mockUser = getMockUserByRole(role);
+      if (!mockUser && role === UserRole.SUPER_ADMIN) {
+         mockUser = {
+            id: 'user-super-admin',
+            tenant_id: 'tenant-1',
+            email: 'superadmin@stradia.io',
+            role: UserRole.SUPER_ADMIN,
+            app_metadata: { role: UserRole.SUPER_ADMIN, tenant_id: 'tenant-1' }
+         };
+      }
+
       if (mockUser) {
         setUser(mockUser);
         localStorage.setItem(STORAGE_KEY, role);
+        document.cookie = `mock_role=${role}; path=/`;
         setIsLoading(false);
         return mockUser;
       }
@@ -133,6 +147,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       setUser(null);
       localStorage.removeItem(STORAGE_KEY);
+      document.cookie = `mock_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
     } else {
       const supabase = createClient();
       await supabase.auth.signOut();

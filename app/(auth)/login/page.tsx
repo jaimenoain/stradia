@@ -44,7 +44,9 @@ export default function LoginPage() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = form;
 
   const routeUser = (user: MockSessionUser) => {
-     if (user.role === UserRole.GLOBAL_ADMIN || user.role === UserRole.SUPERVISOR) {
+     if (user.role === UserRole.SUPER_ADMIN) {
+        router.push("/customers");
+     } else if (user.role === UserRole.GLOBAL_ADMIN || user.role === UserRole.SUPERVISOR) {
         router.push("/overview");
      } else if (user.role === UserRole.LOCAL_USER) {
         if (user.market_id) {
@@ -151,6 +153,14 @@ export default function LoginPage() {
               </div>
 
               <div className="mt-6 grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => handleQuickLogin(UserRole.SUPER_ADMIN)}
+                  disabled={isLoading || isSubmitting}
+                  className="w-full text-xs bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100"
+                >
+                  Super Admin
+                </Button>
                 <Button
                   variant="outline"
                   onClick={() => handleQuickLogin(UserRole.GLOBAL_ADMIN)}

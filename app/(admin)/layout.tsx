@@ -11,19 +11,29 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const useMocks = process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
+  let role: string | undefined;
 
-  if (!user) {
-    redirect('/login');
+  if (useMocks) {
+    const { cookies } = await import('next/headers');
+    const cookieStore = await cookies();
+    role = cookieStore.get('mock_role')?.value;
+  } else {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      redirect('/login');
+    }
+
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { role: true },
+    });
+    role = dbUser?.role;
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { role: true },
-  });
-
-  if (!dbUser || dbUser.role !== 'SUPER_ADMIN') {
+  if (role !== 'SUPER_ADMIN') {
     redirect('/overview');
   }
 
@@ -41,7 +51,7 @@ export default async function AdminLayout({
                <Users className="h-4 w-4" />
                Customers
             </Link>
-             <Link href="/admin/users" className="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
+             <Link href="/users" className="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
                <UserCog className="h-4 w-4" />
                Global Users
             </Link>

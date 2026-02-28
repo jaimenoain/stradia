@@ -39,14 +39,28 @@ export async function updateSession(request: NextRequest, testClient?: any) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const protectedPaths = ['/dashboard', '/overview', '/strategies', '/markets', '/settings'];
+  const protectedPaths = ['/dashboard', '/overview', '/strategies', '/markets', '/settings', '/admin'];
   const isProtectedRoute = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path));
 
   // 1. Protected Route Check
-  if (isProtectedRoute && !user) {
+  // Allow access if using mocks and no real user is present (development mode override)
+  const useMocks = process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
+  const mockRole = request.cookies.get('mock_role')?.value;
+
+  if (isProtectedRoute && !user && (!useMocks || !mockRole)) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
+  }
+
+  // Handle mock specific routing/protection logic since the layout check might be too late or unreliable
+  if (useMocks && mockRole && !user) {
+      if (request.nextUrl.pathname.startsWith('/admin') && mockRole !== 'SUPER_ADMIN') {
+          const url = request.nextUrl.clone();
+          url.pathname = '/overview';
+          return NextResponse.redirect(url);
+      }
+      return supabaseResponse;
   }
 
   // 2. Timeout Logic (Only if user is logged in)
