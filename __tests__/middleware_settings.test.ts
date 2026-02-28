@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { updateSession } from '../lib/supabase/middleware';
 
 // Mock Supabase Client Factory
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createMockClient = (user: any | null) => {
   return {
     auth: {

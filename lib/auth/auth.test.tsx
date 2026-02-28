@@ -4,10 +4,22 @@ import { AuthProvider, useAuth } from './provider';
 import { UserRole } from './types';
 import { getMockUserByRole } from './mock';
 
+// Mock Supabase client
+vi.mock('@/lib/supabase/client', () => ({
+  createClient: vi.fn(() => ({
+    auth: {
+      onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
+      signInWithPassword: vi.fn(),
+      signOut: vi.fn(),
+    },
+  })),
+}));
+
 describe('useAuth', () => {
   beforeEach(() => {
     localStorage.clear();
     vi.clearAllMocks();
+    process.env.NEXT_PUBLIC_USE_MOCKS = 'true';
   });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (

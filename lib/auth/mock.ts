@@ -6,6 +6,7 @@ export const MOCK_USERS: MockSessionUser[] = [
     tenant_id: 'tenant-1',
     email: 'admin@stradia.io',
     role: UserRole.GLOBAL_ADMIN,
+    app_metadata: { role: UserRole.GLOBAL_ADMIN, tenant_id: 'tenant-1' }
   },
   {
     id: 'user-supervisor',
@@ -25,6 +26,7 @@ export const MOCK_USERS: MockSessionUser[] = [
     tenant_id: 'tenant-1',
     email: 'superadmin@stradia.io',
     role: UserRole.SUPER_ADMIN,
+    app_metadata: { role: UserRole.SUPER_ADMIN, tenant_id: 'tenant-1' }
   },
   {
     id: 'user-read-only',

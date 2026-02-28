@@ -12,16 +12,26 @@ import { Building2, Plus } from 'lucide-react';
 import { CreateCustomerSheet } from './create-customer-sheet';
 
 export default async function CustomersPage() {
-  const tenants = await prisma.tenant.findMany({
-    include: {
-      _count: {
-        select: { users: true },
+  const useMocks = process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let tenants: any[] = [];
+
+  if (!useMocks) {
+    tenants = await prisma.tenant.findMany({
+      include: {
+        _count: {
+          select: { users: true },
+        },
       },
-    },
-    orderBy: {
-      created_at: 'desc',
-    },
-  });
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+  } else {
+    // If mock mode, we want the button to be visible, so an empty array works to show empty state,
+    // or an array with items works to show the table with button. Empty array is simpler.
+    tenants = [];
+  }
 
   if (tenants.length === 0) {
     return (
