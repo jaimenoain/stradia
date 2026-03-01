@@ -82,13 +82,20 @@ export async function createCustomerUser(
   }
 
   try {
-    const adminClient = createAdminClient();
-    const { inviteLink } = await createCustomerUserCore(
-      { id: dbUser.id, role: dbUser.role },
-      prisma,
-      adminClient,
-      validatedFields.data
-    );
+    let inviteLink: string | undefined;
+
+    if (!useMocks) {
+      const adminClient = createAdminClient();
+      const result = await createCustomerUserCore(
+        { id: dbUser.id, role: dbUser.role },
+        prisma,
+        adminClient,
+        validatedFields.data
+      );
+      inviteLink = result.inviteLink;
+    } else {
+      inviteLink = 'http://localhost:3000/mock-invite';
+    }
 
     revalidatePath('/admin/customers');
     return {
@@ -182,11 +189,13 @@ export async function createCustomer(
   }
 
   try {
-    await createCustomerCore(
-      { id: dbUser.id, role: dbUser.role },
-      prisma,
-      validatedFields.data
-    );
+    if (!useMocks) {
+      await createCustomerCore(
+        { id: dbUser.id, role: dbUser.role },
+        prisma,
+        validatedFields.data
+      );
+    }
 
     revalidatePath('/customers');
     revalidatePath('/'); // Revalidate root just in case
