@@ -18,6 +18,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import Link from "next/link";
 
 // Data Contract: LoginSchema
 const LoginSchema = z.object({
@@ -128,8 +129,13 @@ export default function LoginPage() {
             {authError && (
               <Alert variant="destructive">
                 <AlertTitle>Error</AlertTitle>
-                <AlertDescription>
-                  {authError}
+                <AlertDescription className="flex flex-col gap-2">
+                  <span>{authError}</span>
+                  {authError.includes("Invalid email or password") && (
+                    <Link href="/forgot-password" className="text-sm underline underline-offset-4 hover:text-red-800">
+                      Forgot your password?
+                    </Link>
+                  )}
                 </AlertDescription>
               </Alert>
             )}
