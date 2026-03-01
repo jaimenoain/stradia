@@ -23,7 +23,7 @@ enum UserRole {
 }
 
 model Tenant {
-  id                   String    @id @default(uuid())
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name                 String
   stripe_customer_id   String?
   active_markets_limit Int
@@ -39,8 +39,8 @@ model Tenant {
 }
 
 model User {
-  id                  String    @id @default(uuid())
-  tenant_id           String
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id           String    @db.Uuid
   email               String    @unique
   password_hash       String
   role                UserRole
@@ -52,8 +52,8 @@ model User {
 }
 
 model Market {
-  id          String    @id @default(uuid())
-  tenant_id   String
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenant_id   String    @db.Uuid
   name        String
   region_code String
   timezone    String
@@ -67,8 +67,8 @@ model Market {
 }
 
 model UserMarket {
-  user_id   String
-  market_id String
+  user_id   String @db.Uuid
+  market_id String @db.Uuid
 
   user   User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   market Market @relation(fields: [market_id], references: [id], onDelete: Cascade)
