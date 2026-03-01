@@ -81,14 +81,6 @@ export async function createCustomerUser(
     };
   }
 
-  if (useMocks) {
-      return {
-          success: true,
-          message: 'User created successfully! (Mock)',
-          inviteLink: 'https://mock.stradia.io/invite?token=12345'
-      };
-  }
-
   try {
     const adminClient = createAdminClient();
     const { inviteLink } = await createCustomerUserCore(
@@ -187,10 +179,6 @@ export async function createCustomer(
       message: 'Validation failed',
       errors: validatedFields.error.flatten().fieldErrors as ActionState['errors'],
     };
-  }
-
-  if (useMocks) {
-      return { success: true, message: 'Customer created successfully (Mock)' };
   }
 
   try {
