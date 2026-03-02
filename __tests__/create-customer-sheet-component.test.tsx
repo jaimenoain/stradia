@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { CreateCustomerSheet } from '@/app/(admin)/customers/create-customer-sheet';
+import { CreateCustomerSheet } from '@/app/admin/customers/create-customer-sheet';
 
 // Mock useRouter
 vi.mock('next/navigation', () => ({
