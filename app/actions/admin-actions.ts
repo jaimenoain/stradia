@@ -197,7 +197,7 @@ export async function createCustomer(
       );
     }
 
-    revalidatePath('/customers');
+    revalidatePath('/admin/customers');
     revalidatePath('/'); // Revalidate root just in case
     return { success: true, message: 'Customer created successfully' };
   } catch (error) {

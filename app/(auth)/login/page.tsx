@@ -46,7 +46,7 @@ export default function LoginPage() {
 
   const routeUser = (user: MockSessionUser) => {
      if (user.role === UserRole.SUPER_ADMIN) {
-        router.push("/customers");
+        router.push("/admin/customers");
      } else if (user.role === UserRole.GLOBAL_ADMIN || user.role === UserRole.SUPERVISOR) {
         router.push("/overview");
      } else if (user.role === UserRole.LOCAL_USER) {
