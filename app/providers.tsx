@@ -3,7 +3,6 @@
 import * as React from "react"
 import { ThemeProvider as NextThemesProvider } from "next-themes"
 import { AuthProvider } from "@/lib/auth/provider"
-import { MockSessionProvider } from "@/lib/auth/mock-session-provider"
 
 // Mock QueryClient and Provider since package is missing
 interface QueryClientType {
@@ -29,11 +28,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
     >
       <QueryClientProvider client={queryClient}>
-        <MockSessionProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
-        </MockSessionProvider>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </QueryClientProvider>
     </NextThemesProvider>
   )

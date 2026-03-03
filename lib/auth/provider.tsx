@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { MockSessionUser, UserRole } from './types';
-import { getMockUserByRole, getMockUserByEmail } from './mock';
 import { createClient } from '@/lib/supabase/client';
 
 interface AuthContextType {
@@ -26,16 +25,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let subscription: { unsubscribe: () => void } | null = null;
 
     if (useMocks) {
-      // Initialize from local storage
-      const storedRole = localStorage.getItem(STORAGE_KEY);
-      if (storedRole) {
-        const storedUser = getMockUserByRole(storedRole as UserRole);
-        if (storedUser) {
-          setUser(storedUser);
-          // Also set a mock cookie for middleware to see "something" if needed
-          document.cookie = `mock_role=${storedRole}; path=/`;
-        }
-      }
+      // Mocks disabled: we remove local storage init.
+      console.warn("Mocks are disabled. The application should use real auth only.");
       setIsLoading(false);
     } else {
       // Initialize Supabase Auth
@@ -70,19 +61,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
       // Simulate network delay
       await new Promise((resolve) => setTimeout(resolve, 500));
-
-      const mockUser = getMockUserByEmail(email);
-      // For mock purposes, we accept any password if the email matches a mock user
-      if (mockUser) {
-        setUser(mockUser);
-        localStorage.setItem(STORAGE_KEY, mockUser.role);
-        document.cookie = `mock_role=${mockUser.role}; path=/`;
-        setIsLoading(false);
-        return mockUser;
-      } else {
-        setIsLoading(false);
-        throw new Error("Invalid email or password");
-      }
+      console.warn("Mock login called but mock users are removed.");
+      setIsLoading(false);
+      throw new Error("Invalid email or password");
     } else {
       const supabase = createClient();
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -109,30 +90,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const devLogin = async (role: UserRole): Promise<MockSessionUser | null> => {
+  const devLogin = async (_role: UserRole): Promise<MockSessionUser | null> => {
     if (useMocks) {
       setIsLoading(true);
       // Simulate network delay
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      let mockUser = getMockUserByRole(role);
-      if (!mockUser && role === UserRole.SUPER_ADMIN) {
-         mockUser = {
-            id: 'user-super-admin',
-            tenant_id: 'tenant-1',
-            email: 'superadmin@stradia.io',
-            role: UserRole.SUPER_ADMIN,
-            app_metadata: { role: UserRole.SUPER_ADMIN, tenant_id: 'tenant-1' }
-         };
-      }
-
-      if (mockUser) {
-        setUser(mockUser);
-        localStorage.setItem(STORAGE_KEY, role);
-        document.cookie = `mock_role=${role}; path=/`;
-        setIsLoading(false);
-        return mockUser;
-      }
+      console.warn("devLogin called but mock users are removed.");
       setIsLoading(false);
       return null;
     } else {

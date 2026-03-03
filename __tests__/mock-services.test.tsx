@@ -3,7 +3,6 @@ import { render } from '@testing-library/react';
 import { apiClient } from '@/lib/api-client';
 import { useSessionStore } from '@/lib/stores/session-store';
 import { UserRole, MockSessionUser } from '@/lib/auth/types';
-import { MockSessionProvider } from '@/lib/auth/mock-session-provider';
 
 describe('Mock Services Verification', () => {
   const originalEnv = process.env;
@@ -59,30 +58,5 @@ describe('Mock Services Verification', () => {
 
     expect(storedUser).toEqual(mockAdmin);
     expect(storedUser?.role).toBe(UserRole.GLOBAL_ADMIN);
-  });
-
-  it('MockSessionProvider: Should hydrate session store on mount when mocks enabled', () => {
-    process.env.NEXT_PUBLIC_USE_MOCKS = 'true';
-
-    // Reset store
-    useSessionStore.setState({ user: null, isAuthenticated: false });
-
-    render(<MockSessionProvider><div>Child</div></MockSessionProvider>);
-
-    const storedUser = useSessionStore.getState().user;
-    expect(storedUser).toBeDefined();
-    expect(storedUser?.role).toBe(UserRole.GLOBAL_ADMIN);
-  });
-
-  it('MockSessionProvider: Should NOT hydrate session store when mocks disabled', () => {
-    process.env.NEXT_PUBLIC_USE_MOCKS = 'false';
-
-    // Reset store
-    useSessionStore.setState({ user: null, isAuthenticated: false });
-
-    render(<MockSessionProvider><div>Child</div></MockSessionProvider>);
-
-    const storedUser = useSessionStore.getState().user;
-    expect(storedUser).toBeNull();
   });
 });
