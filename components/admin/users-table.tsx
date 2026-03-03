@@ -7,14 +7,22 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { User, Tenant } from '@prisma/client';
 
-type UserWithTenant = User & {
-  tenant: Tenant;
-};
+interface LocalTenant {
+  id: string;
+  name: string;
+  is_active: boolean;
+}
+
+interface LocalUser {
+  id: string;
+  email: string;
+  role: string;
+  tenant: LocalTenant;
+}
 
 interface UsersTableProps {
-  users: UserWithTenant[];
+  users: LocalUser[];
   action?: React.ReactNode;
 }
 
