@@ -11,27 +11,18 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const useMocks = process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
-  let role: string | undefined;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (useMocks) {
-    const { cookies } = await import('next/headers');
-    const cookieStore = await cookies();
-    role = cookieStore.get('mock_role')?.value;
-  } else {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      redirect('/login');
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { role: true },
-    });
-    role = dbUser?.role;
+  if (!user) {
+    redirect('/login');
   }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  });
+  const role = dbUser?.role;
 
   if (role !== 'SUPER_ADMIN') {
     redirect('/overview');
