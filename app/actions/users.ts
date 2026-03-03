@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
-import { ProvisionUserDTO, provisionUserCore, updateUserRoleAndMarketsCore, deleteUserCore } from './users-core';
+import { ProvisionUserDTO, provisionUserCore, updateUserRoleAndMarketsCore, deleteUserCore, getTenantUsersCore } from './users-core';
 
 export async function inviteUser(dto: ProvisionUserDTO) {
   const supabase = await createClient();
@@ -52,4 +52,25 @@ export async function deleteUser(userId: string) {
   }
 
   return await deleteUserCore(prisma, tenantId, userId);
+}
+
+export async function getTenantUsers() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('Unauthorized');
+  }
+
+  const currentUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { tenant_id: true, role: true },
+  });
+
+  if (!currentUser) {
+    throw new Error('User not found in database');
+  }
+
+  // Call core logic
+  return await getTenantUsersCore(prisma, currentUser.tenant_id, currentUser.role);
 }

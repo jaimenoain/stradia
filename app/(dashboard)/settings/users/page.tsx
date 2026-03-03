@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { UserRole } from '@prisma/client'
 import { UserDirectoryClient } from './client'
 import { User as FrontendUser, UserRole as FrontendUserRole } from './types'
+import { getTenantUsers } from '@/app/actions/users'
 
 export default async function UserDirectoryPage() {
   const supabase = await createClient()
@@ -35,18 +36,7 @@ export default async function UserDirectoryPage() {
     )
   }
 
-  // Fetch all users for the tenant
-  const users = await prisma.user.findMany({
-    where: currentUser.role === UserRole.SUPER_ADMIN ? undefined : { tenant_id: currentUser.tenant_id },
-    include: {
-      markets: {
-        include: {
-          market: true,
-        },
-      },
-    },
-    orderBy: { email: 'asc' },
-  })
+  const users = await getTenantUsers()
 
   // Fetch all active markets for the tenant (for assignment)
   const markets = await prisma.market.findMany({

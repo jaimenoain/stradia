@@ -74,8 +74,22 @@ export function UserDirectoryClient({
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="h-24 text-center">
-                  No users found.
+                <TableCell colSpan={4} className="h-48 text-center">
+                  <div className="flex flex-col items-center justify-center space-y-3">
+                    <div className="rounded-full bg-muted p-3">
+                      <UserPlus className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <div className="text-center">
+                      <h3 className="text-lg font-semibold">No users found</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Get started by inviting users to your tenant.
+                      </p>
+                    </div>
+                    <Button onClick={() => setIsInviteOpen(true)} disabled={currentUserRole !== 'GLOBAL_ADMIN' && currentUserRole !== 'SUPER_ADMIN'} className="mt-4">
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Invite User
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
