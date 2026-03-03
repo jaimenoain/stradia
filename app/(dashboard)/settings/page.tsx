@@ -21,12 +21,12 @@ export default async function SettingsPage() {
      redirect('/login')
   }
 
-  if (dbUser.role !== UserRole.GLOBAL_ADMIN) {
+  if (dbUser.role !== UserRole.GLOBAL_ADMIN && dbUser.role !== UserRole.SUPER_ADMIN) {
       return <div className="p-4 text-red-500">Access Denied: Global Admin privileges required.</div>
   }
 
   const markets = await prisma.market.findMany({
-    where: { tenant_id: dbUser.tenant_id },
+    where: dbUser.role === UserRole.SUPER_ADMIN ? undefined : { tenant_id: dbUser.tenant_id },
     orderBy: { name: 'asc' },
   })
 
