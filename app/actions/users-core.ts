@@ -159,3 +159,21 @@ export async function deleteUserCore(
     });
   });
 }
+
+export async function getTenantUsersCore(
+  prisma: PrismaClient,
+  tenantId: string,
+  userRole: UserRole
+) {
+  return await prisma.user.findMany({
+    where: userRole === UserRole.SUPER_ADMIN ? undefined : { tenant_id: tenantId },
+    include: {
+      markets: {
+        include: {
+          market: true,
+        },
+      },
+    },
+    orderBy: { email: 'asc' },
+  });
+}
