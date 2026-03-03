@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import crypto from 'crypto';
-import { PrismaClient, Tenant, User, UserRole as PrismaUserRole } from '@prisma/client';
+import { PrismaClient, Tenant, User, Market, UserRole as PrismaUserRole } from '@prisma/client';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 export type ActionState = {
@@ -15,6 +15,8 @@ export type ActionState = {
     email?: string[];
     password?: string[];
     tenant_id?: string[];
+    region_code?: string[];
+    timezone?: string[];
   };
 };
 
@@ -83,6 +85,84 @@ export const createCustomerUserSchema = z.object({
 });
 
 export type CreateCustomerUserInput = z.infer<typeof createCustomerUserSchema>;
+
+export const createGlobalMarketSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  region_code: z.string().min(1, 'Region code is required'),
+  timezone: z.string().min(1, 'Timezone is required'),
+  tenant_id: z.string().uuid('Invalid Tenant ID'),
+});
+
+export type CreateGlobalMarketInput = z.infer<typeof createGlobalMarketSchema>;
+
+export async function createGlobalMarketCore(
+  user: AdminCoreUser,
+  db: PrismaClient,
+  input: CreateGlobalMarketInput
+): Promise<Market> {
+  if (user.role !== UserRole.SUPER_ADMIN) {
+    throw new Error('Forbidden: Only Super Admins can create global markets');
+  }
+
+  const { name, region_code, timezone, tenant_id } = input;
+
+  const tenant = await db.tenant.findUnique({
+    where: { id: tenant_id },
+    select: { active_markets_limit: true },
+  });
+
+  if (!tenant) {
+    throw new Error('Tenant not found');
+  }
+
+  const currentMarketCount = await db.market.count({
+    where: {
+      tenant_id,
+      is_active: true,
+      deleted_at: null,
+    },
+  });
+
+  if (currentMarketCount >= tenant.active_markets_limit) {
+    throw new Error('Active Market limit reached for this tenant');
+  }
+
+  return await db.market.create({
+    data: {
+      tenant_id,
+      name,
+      region_code,
+      timezone,
+      is_active: true,
+    },
+  });
+}
+
+export async function deleteGlobalMarketCore(
+  user: AdminCoreUser,
+  db: PrismaClient,
+  marketId: string
+): Promise<Market> {
+  if (user.role !== UserRole.SUPER_ADMIN) {
+    throw new Error('Forbidden: Only Super Admins can delete global markets');
+  }
+
+  const market = await db.market.findUnique({
+    where: { id: marketId },
+  });
+
+  if (!market) {
+    throw new Error('Market not found');
+  }
+
+  return await db.market.update({
+    where: { id: marketId },
+    data: {
+      is_active: false,
+      deleted_at: new Date(),
+    },
+  });
+}
 
 export async function createCustomerUserCore(
   user: AdminCoreUser,

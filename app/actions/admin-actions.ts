@@ -9,10 +9,98 @@ import {
   createCustomerSchema,
   createCustomerUserCore,
   createCustomerUserSchema,
+  createGlobalMarketCore,
+  createGlobalMarketSchema,
+  deleteGlobalMarketCore,
   ActionState,
 } from './admin-core';
 
 export type { ActionState };
+
+export async function createGlobalMarketAction(prevState: ActionState, formData: FormData): Promise<ActionState> {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { success: false, message: 'Unauthorized' }
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  })
+
+  if (!dbUser) {
+    return { success: false, message: 'User not found in database' }
+  }
+
+  const validatedFields = createGlobalMarketSchema.safeParse({
+    name: formData.get('name'),
+    region_code: formData.get('region_code'),
+    timezone: formData.get('timezone'),
+    tenant_id: formData.get('tenant_id'),
+  })
+
+  if (!validatedFields.success) {
+    return {
+      success: false,
+      message: 'Validation failed',
+      errors: validatedFields.error.flatten().fieldErrors,
+    }
+  }
+
+  try {
+    await createGlobalMarketCore(
+      { id: user.id, role: dbUser.role as unknown as string },
+      prisma,
+      validatedFields.data
+    )
+
+    revalidatePath('/admin/markets')
+    return { success: true, message: 'Market created successfully' }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to create market';
+    return { success: false, message }
+  }
+}
+
+export async function deleteGlobalMarketAction(prevState: ActionState, formData: FormData): Promise<ActionState> {
+  const marketId = formData.get('marketId') as string
+
+  if (!marketId) {
+    return { success: false, message: 'Market ID is required' }
+  }
+
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { success: false, message: 'Unauthorized' }
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { role: true },
+  })
+
+  if (!dbUser) {
+    return { success: false, message: 'User not found in database' }
+  }
+
+  try {
+    await deleteGlobalMarketCore(
+      { id: user.id, role: dbUser.role as unknown as string },
+      prisma,
+      marketId
+    )
+
+    revalidatePath('/admin/markets')
+    return { success: true, message: 'Market deleted successfully' }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to delete market';
+    return { success: false, message }
+  }
+}
 
 export async function createCustomerUser(
   prevState: ActionState,
