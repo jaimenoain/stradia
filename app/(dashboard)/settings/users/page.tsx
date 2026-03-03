@@ -23,13 +23,13 @@ export default async function UserDirectoryPage() {
     redirect('/login')
   }
 
-  // Only GLOBAL_ADMIN can access this page
-  if (currentUser.role !== UserRole.GLOBAL_ADMIN) {
+  // Only GLOBAL_ADMIN and SUPER_ADMIN can access this page
+  if (currentUser.role !== UserRole.GLOBAL_ADMIN && currentUser.role !== UserRole.SUPER_ADMIN) {
     return (
       <div className="flex h-full flex-col items-center justify-center space-y-4">
         <h1 className="text-2xl font-bold text-red-600">Access Denied</h1>
         <p className="text-muted-foreground">
-          You must be a Global Admin to view this page.
+          You must be a Global Admin or Super Admin to view this page.
         </p>
       </div>
     )
@@ -37,7 +37,7 @@ export default async function UserDirectoryPage() {
 
   // Fetch all users for the tenant
   const users = await prisma.user.findMany({
-    where: { tenant_id: currentUser.tenant_id },
+    where: currentUser.role === UserRole.SUPER_ADMIN ? undefined : { tenant_id: currentUser.tenant_id },
     include: {
       markets: {
         include: {
@@ -50,10 +50,12 @@ export default async function UserDirectoryPage() {
 
   // Fetch all active markets for the tenant (for assignment)
   const markets = await prisma.market.findMany({
-    where: {
-      tenant_id: currentUser.tenant_id,
-      deleted_at: null // Only fetch active markets
-    },
+    where: currentUser.role === UserRole.SUPER_ADMIN
+      ? { deleted_at: null }
+      : {
+          tenant_id: currentUser.tenant_id,
+          deleted_at: null // Only fetch active markets
+        },
     orderBy: { name: 'asc' },
   })
 

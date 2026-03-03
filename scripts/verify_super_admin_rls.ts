@@ -76,10 +76,10 @@ async function seedData(db: any) {
       await db.exec(`INSERT INTO "Tenant" (id, name, active_markets_limit, user_seat_limit, ai_token_quota, ai_tokens_used, is_active) VALUES ('22222222-2222-2222-2222-222222222222', 'Tenant B', 10, 10, 1000, 0, true);`);
 
       // Markets
-      await db.exec(`INSERT INTO "Market" (id, tenant_id, name, region_code, timezone, is_active) VALUES ('mkt-a1-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', 'Market A1', 'US', 'UTC', true);`);
+      await db.exec(`INSERT INTO "Market" (id, tenant_id, name, region_code, timezone, is_active) VALUES ('11111111-1111-1111-1111-a11111111111', '11111111-1111-1111-1111-111111111111', 'Market A1', 'US', 'UTC', true);`);
       // Market A2 (Tenant A) - Unassigned to Local User
-      await db.exec(`INSERT INTO "Market" (id, tenant_id, name, region_code, timezone, is_active) VALUES ('mkt-a2-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', 'Market A2', 'US', 'UTC', true);`);
-      await db.exec(`INSERT INTO "Market" (id, tenant_id, name, region_code, timezone, is_active) VALUES ('mkt-b1-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222', 'Market B1', 'US', 'UTC', true);`);
+      await db.exec(`INSERT INTO "Market" (id, tenant_id, name, region_code, timezone, is_active) VALUES ('11111111-1111-1111-1111-a21111111111', '11111111-1111-1111-1111-111111111111', 'Market A2', 'US', 'UTC', true);`);
+      await db.exec(`INSERT INTO "Market" (id, tenant_id, name, region_code, timezone, is_active) VALUES ('22222222-2222-2222-2222-b11111111111', '22222222-2222-2222-2222-222222222222', 'Market B1', 'US', 'UTC', true);`);
 
       // Seed Users for Tests
       // Global Admin (Tenant A)
@@ -87,7 +87,7 @@ async function seedData(db: any) {
       // Local User (Tenant A)
       await db.exec(`INSERT INTO "User" (id, tenant_id, email, password_hash, role, language_preference) VALUES ('aaaa2222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'user@a.com', 'hash', 'LOCAL_USER', 'en');`);
       // UserMarket Assignment
-      await db.exec(`INSERT INTO "UserMarket" (user_id, market_id) VALUES ('aaaa2222-2222-2222-2222-222222222222', 'mkt-a1-1111-1111-1111-111111111111');`);
+      await db.exec(`INSERT INTO "UserMarket" (user_id, market_id) VALUES ('aaaa2222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-a11111111111');`);
   } catch (e) {
       console.error('Failed to seed data', e);
       process.exit(1);
@@ -152,7 +152,7 @@ async function verifySuperAdminPolicies(db: any) {
 
   const marketsGA2 = await db.query(`SELECT id FROM "Market"`);
   assert(marketsGA2.rows.length === 2, `Global Admin should see 2 markets (A1, A2), saw ${marketsGA2.rows.length}`);
-  // assert(marketsGA2.rows[0].id === 'mkt-a1-1111-1111-1111-111111111111', 'Global Admin sees correct market');
+  // assert(marketsGA2.rows[0].id === '11111111-1111-1111-1111-a11111111111', 'Global Admin sees correct market');
 
   console.log('✅ Global Admin (Tenant A) sees all tenant markets.');
 
@@ -167,7 +167,7 @@ async function verifySuperAdminPolicies(db: any) {
 
   // Ensure they don't see Market A2 (which exists but is not assigned)
   if (marketsUser.rows.length > 0) {
-      assert(marketsUser.rows[0].id === 'mkt-a1-1111-1111-1111-111111111111', 'Local User sees correct market');
+      assert(marketsUser.rows[0].id === '11111111-1111-1111-1111-a11111111111', 'Local User sees correct market');
   }
 
   console.log('✅ Local User (Tenant A) sees only assigned markets.');
