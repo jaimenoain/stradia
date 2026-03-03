@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client'
+import { validateDatabaseEnv } from './env/server'
 
 const prismaClientSingleton = () => {
+  validateDatabaseEnv()
   return new PrismaClient()
 }
 
