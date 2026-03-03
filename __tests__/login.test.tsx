@@ -28,19 +28,6 @@ vi.mock('@/lib/auth/provider', () => ({
   useAuth: vi.fn(),
 }));
 
-// Mock lib/auth/mock (needed if component imports it, but ideally shouldn't use it directly)
-vi.mock('@/lib/auth/mock', () => ({
-  getMockUserByEmail: vi.fn(),
-  getMockUserByRole: vi.fn(),
-  UserRole: {
-    SUPER_ADMIN: 'SUPER_ADMIN',
-    GLOBAL_ADMIN: 'GLOBAL_ADMIN',
-    SUPERVISOR: 'SUPERVISOR',
-    LOCAL_USER: 'LOCAL_USER',
-    READ_ONLY: 'READ_ONLY',
-  }
-}));
-
 // Mock supabase client
 vi.mock('@/lib/supabase/client', () => ({
   createClient: vi.fn(() => ({
