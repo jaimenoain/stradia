@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
-import { Users, LogOut, ShieldCheck, UserCog, LayoutDashboard } from 'lucide-react';
+import { Users, LogOut, ShieldCheck, UserCog, LayoutDashboard, LineChart } from 'lucide-react';
 import { signOut } from '@/app/actions/auth';
 
 export default async function AdminLayout({
@@ -54,6 +54,10 @@ export default async function AdminLayout({
              <Link href="/admin/users" className="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
                <UserCog className="h-4 w-4" />
                Global Users
+            </Link>
+            <Link href="/admin/markets" className="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800 transition-all">
+               <LineChart className="h-4 w-4" />
+               Markets
             </Link>
              <div className="my-2 border-t border-slate-800" />
               <Link href="/overview" className="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-800 transition-all">

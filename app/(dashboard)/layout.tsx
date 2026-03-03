@@ -4,7 +4,6 @@ import {
   Home,
   Layers,
   Settings,
-  LineChart,
   LogOut,
   Users,
   Shield
@@ -67,13 +66,6 @@ export default async function DashboardLayout({
           >
             <Users className="h-4 w-4" />
             User Directory
-          </Link>
-          <Link
-            href="/markets/123/board"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary hover:bg-muted"
-          >
-            <LineChart className="h-4 w-4" />
-            Mock Market Board
           </Link>
           {user?.app_metadata?.role === 'SUPER_ADMIN' && (
             <Link
