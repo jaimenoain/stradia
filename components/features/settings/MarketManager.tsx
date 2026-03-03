@@ -29,7 +29,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { Trash2, Plus, Loader2 } from 'lucide-react'
-import { createMarketAction, deleteMarketAction, ActionState } from '@/app/actions/market-actions'
+import { createMarketAction, deleteMarketAction } from '@/app/actions/market-actions'
+import { ActionState } from '@/app/actions/market-core'
 
 export type MarketWithStatus = {
     id: string

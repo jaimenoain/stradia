@@ -29,7 +29,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { Trash2, Plus, Loader2 } from 'lucide-react'
-import { createGlobalMarketAction, deleteGlobalMarketAction, ActionState } from '@/app/actions/admin-actions'
+import { createGlobalMarketAction, deleteGlobalMarketAction } from '@/app/actions/admin-actions'
+import { ActionState } from '@/app/actions/admin-core'
 
 export type GlobalMarketWithStatus = {
     id: string

@@ -15,7 +15,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { createCustomer, ActionState } from '@/app/actions/admin-actions';
+import { createCustomer } from '@/app/actions/admin-actions';
+import { ActionState } from '@/app/actions/admin-core';
 import { Loader2 } from 'lucide-react';
 
 const initialState: ActionState = {

@@ -15,8 +15,6 @@ import {
   ActionState,
 } from './admin-core';
 
-export type { ActionState };
-
 export async function createGlobalMarketAction(prevState: ActionState, formData: FormData): Promise<ActionState> {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()

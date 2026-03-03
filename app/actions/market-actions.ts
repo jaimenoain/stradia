@@ -5,8 +5,6 @@ import { prisma } from '@/lib/prisma'
 import { createClient } from '@/lib/supabase/server'
 import { createMarketCore, deleteMarketCore, marketSchema, ActionState } from './market-core'
 
-export type { ActionState }
-
 export async function createMarketAction(prevState: ActionState, formData: FormData): Promise<ActionState> {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
