@@ -7,6 +7,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Users } from 'lucide-react';
 
 interface LocalTenant {
   id: string;
@@ -27,11 +28,35 @@ interface UsersTableProps {
 }
 
 export function UsersTable({ users, action }: UsersTableProps) {
+  if (users.length === 0) {
+    return (
+      <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed bg-white">
+        <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-100">
+             <Users className="h-10 w-10 text-slate-400" />
+          </div>
+          <h3 className="mt-4 text-lg font-semibold">No global users added</h3>
+          <p className="mb-4 mt-2 text-sm text-slate-500">
+            You haven&apos;t added any users to the platform yet.
+          </p>
+          {action}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Global Users</h1>
-        {action}
+    <div className="flex flex-col gap-8">
+      <div className="flex items-center justify-between space-y-2">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Global Users</h2>
+          <p className="text-muted-foreground">
+            Manage your global users.
+          </p>
+        </div>
+        <div className="flex items-center space-x-2">
+          {action}
+        </div>
       </div>
 
       <div className="rounded-md border bg-white shadow-sm">
@@ -45,35 +70,24 @@ export function UsersTable({ users, action }: UsersTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={4}
-                  className="h-24 text-center text-muted-foreground"
-                >
-                  No users found.
+            {users.map((user) => (
+              <TableRow key={user.id}>
+                <TableCell className="font-medium">{user.email}</TableCell>
+                <TableCell>
+                  <Badge variant="outline">{user.role}</Badge>
+                </TableCell>
+                <TableCell>{user.tenant.name}</TableCell>
+                <TableCell>
+                  {user.tenant.is_active ? (
+                    <Badge variant="default" className="bg-emerald-600 hover:bg-emerald-700">
+                      Active
+                    </Badge>
+                  ) : (
+                    <Badge variant="destructive">Inactive Tenant</Badge>
+                  )}
                 </TableCell>
               </TableRow>
-            ) : (
-              users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.email}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{user.role}</Badge>
-                  </TableCell>
-                  <TableCell>{user.tenant.name}</TableCell>
-                  <TableCell>
-                    {user.tenant.is_active ? (
-                      <Badge variant="default" className="bg-emerald-600 hover:bg-emerald-700">
-                        Active
-                      </Badge>
-                    ) : (
-                      <Badge variant="destructive">Inactive Tenant</Badge>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
+            ))}
           </TableBody>
         </Table>
       </div>

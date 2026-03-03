@@ -233,3 +233,43 @@ export async function createCustomerUserCore(
     throw error;
   }
 }
+
+export async function getGlobalUsersCore(
+  user: AdminCoreUser,
+  db: PrismaClient
+) {
+  if (user.role !== UserRole.SUPER_ADMIN) {
+    throw new Error('Forbidden: Only Super Admins can fetch global users');
+  }
+
+  return await db.user.findMany({
+    include: {
+      tenant: true,
+    },
+    orderBy: {
+      email: 'asc',
+    },
+  });
+}
+
+export async function getActiveTenantsCore(
+  user: AdminCoreUser,
+  db: PrismaClient
+) {
+  if (user.role !== UserRole.SUPER_ADMIN) {
+    throw new Error('Forbidden: Only Super Admins can fetch active tenants');
+  }
+
+  return await db.tenant.findMany({
+    where: {
+      is_active: true,
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+    orderBy: {
+      name: 'asc',
+    },
+  });
+}
