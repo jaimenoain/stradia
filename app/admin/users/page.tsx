@@ -4,13 +4,25 @@ import { CreateUserDialog } from './create-user-dialog';
 
 export default async function UsersPage() {
   const useMocks = process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let users: any[] = [];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let tenants: any[] = [];
+
+  let users: Array<{
+    id: string;
+    email: string;
+    role: string;
+    tenant: {
+      id: string;
+      name: string;
+      is_active: boolean;
+    };
+  }> = [];
+
+  let tenants: Array<{
+    id: string;
+    name: string;
+  }> = [];
 
   if (!useMocks) {
-    users = await prisma.user.findMany({
+    const dbUsers = await prisma.user.findMany({
       include: {
         tenant: true,
       },
@@ -19,7 +31,18 @@ export default async function UsersPage() {
       },
     });
 
-    tenants = await prisma.tenant.findMany({
+    users = dbUsers.map((u) => ({
+      id: u.id,
+      email: u.email,
+      role: u.role,
+      tenant: {
+        id: u.tenant?.id || '',
+        name: u.tenant?.name || 'Unknown',
+        is_active: u.tenant?.is_active ?? false,
+      }
+    }));
+
+    const dbTenants = await prisma.tenant.findMany({
       where: {
         is_active: true,
       },
@@ -31,6 +54,11 @@ export default async function UsersPage() {
         name: 'asc',
       },
     });
+
+    tenants = dbTenants.map((t) => ({
+      id: t.id,
+      name: t.name,
+    }));
   } else {
      users = [];
      tenants = [
