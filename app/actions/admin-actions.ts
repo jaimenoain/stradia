@@ -12,6 +12,8 @@ import {
   createGlobalMarketCore,
   createGlobalMarketSchema,
   deleteGlobalMarketCore,
+  getGlobalUsersCore,
+  getActiveTenantsCore,
   ActionState,
 } from './admin-core';
 
@@ -196,6 +198,52 @@ export async function createCustomerUser(
       error instanceof Error ? error.message : 'Failed to create customer user';
     return { success: false, message };
   }
+}
+
+export async function getGlobalUsers() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error('Unauthorized');
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { id: true, role: true },
+  });
+
+  if (!dbUser) {
+    throw new Error('User not found in database');
+  }
+
+  return await getGlobalUsersCore({ id: dbUser.id, role: dbUser.role as string }, prisma);
+}
+
+export async function getActiveTenants() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error('Unauthorized');
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { id: true, role: true },
+  });
+
+  if (!dbUser) {
+    throw new Error('User not found in database');
+  }
+
+  return await getActiveTenantsCore({ id: dbUser.id, role: dbUser.role as string }, prisma);
 }
 
 export async function createCustomer(
