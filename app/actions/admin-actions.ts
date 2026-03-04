@@ -207,20 +207,74 @@ export async function getGlobalUsers() {
     error: authError,
   } = await supabase.auth.getUser();
 
-  if (authError || !user) {
+  const useMocks = process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
+
+  let dbUser: { id: string; role: string } | null = null;
+  let userId = user?.id;
+
+  if (useMocks && !user) {
+    const { cookies } = await import('next/headers');
+    const cookieStore = await cookies();
+    const mockRole = cookieStore.get('mock_role')?.value;
+    if (mockRole) {
+       userId = 'mock-user-id';
+       dbUser = { id: userId, role: mockRole };
+    }
+  }
+
+  if ((authError || !user) && !dbUser) {
     throw new Error('Unauthorized');
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { id: true, role: true },
-  });
+  if (!dbUser && userId) {
+      dbUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, role: true },
+      });
+  }
+
+  if (!dbUser) {
+    if (useMocks) {
+         const { cookies } = await import('next/headers');
+         const cookieStore = await cookies();
+         const mockRole = cookieStore.get('mock_role')?.value;
+         if (mockRole) {
+             dbUser = { id: 'mock-user-id', role: mockRole };
+         }
+    }
+  }
 
   if (!dbUser) {
     throw new Error('User not found in database');
   }
 
-  return await getGlobalUsersCore({ id: dbUser.id, role: dbUser.role as string }, prisma);
+  if (useMocks) {
+    return [
+      {
+        id: 'mock-user-1',
+        email: 'admin@stradia.io',
+        role: 'SUPER_ADMIN',
+        tenant: {
+          id: 'mock-tenant-1',
+          name: 'Stradia',
+          is_active: true,
+        },
+      },
+    ];
+  }
+
+  const rawUsers = await getGlobalUsersCore({ id: dbUser.id, role: dbUser.role as string }, prisma);
+
+  return rawUsers.map((u) => ({
+    id: u.id,
+    email: u.email,
+    role: u.role,
+    tenant: {
+      id: u.tenant.id,
+      name: u.tenant.name,
+      is_active: u.tenant.is_active,
+    },
+  }));
 }
 
 export async function getActiveTenants() {
@@ -230,20 +284,65 @@ export async function getActiveTenants() {
     error: authError,
   } = await supabase.auth.getUser();
 
-  if (authError || !user) {
+  const useMocks = process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
+
+  let dbUser: { id: string; role: string } | null = null;
+  let userId = user?.id;
+
+  if (useMocks && !user) {
+    const { cookies } = await import('next/headers');
+    const cookieStore = await cookies();
+    const mockRole = cookieStore.get('mock_role')?.value;
+    if (mockRole) {
+       userId = 'mock-user-id';
+       dbUser = { id: userId, role: mockRole };
+    }
+  }
+
+  if ((authError || !user) && !dbUser) {
     throw new Error('Unauthorized');
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { id: true, role: true },
-  });
+  if (!dbUser && userId) {
+      dbUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, role: true },
+      });
+  }
+
+  if (!dbUser) {
+    if (useMocks) {
+         const { cookies } = await import('next/headers');
+         const cookieStore = await cookies();
+         const mockRole = cookieStore.get('mock_role')?.value;
+         if (mockRole) {
+             dbUser = { id: 'mock-user-id', role: mockRole };
+         }
+    }
+  }
 
   if (!dbUser) {
     throw new Error('User not found in database');
   }
 
-  return await getActiveTenantsCore({ id: dbUser.id, role: dbUser.role as string }, prisma);
+  if (useMocks) {
+    return [
+      {
+        id: 'mock-tenant-1',
+        name: 'Stradia',
+      },
+      {
+        id: 'mock-tenant-2',
+        name: 'Acme Corp',
+      },
+    ];
+  }
+
+  const rawTenants = await getActiveTenantsCore({ id: dbUser.id, role: dbUser.role as string }, prisma);
+  return rawTenants.map((t) => ({
+    id: t.id,
+    name: t.name,
+  }));
 }
 
 export async function createCustomer(
