@@ -23,8 +23,12 @@ test.describe('Login Page', () => {
   test('should show error for invalid credentials', async ({ page }) => {
     await page.goto('/login');
 
+    // Wait for the inputs to be enabled before filling
+    const emailInput = page.locator('input[type="email"]');
+    await expect(emailInput).toBeEnabled();
+
     // Fill invalid credentials
-    await page.fill('input[type="email"]', 'wrong@example.com');
+    await emailInput.fill('wrong@example.com');
     await page.fill('input[type="password"]', 'wrongpassword');
 
     // Click submit
