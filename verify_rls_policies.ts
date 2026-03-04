@@ -79,11 +79,11 @@ async function seedData(db: any) {
 
       // Users
       // Admin A (Global Admin)
-      await db.exec(`INSERT INTO "User" (id, tenant_id, email, password_hash, role, language_preference) VALUES ('aaaa1111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', 'admin@a.com', 'hash', 'GLOBAL_ADMIN', 'en');`);
+      await db.exec(`INSERT INTO "User" (id, tenant_id, email, role, language_preference) VALUES ('aaaa1111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', 'admin@a.com', 'GLOBAL_ADMIN', 'en');`);
       // Local User A1 (Local User)
-      await db.exec(`INSERT INTO "User" (id, tenant_id, email, password_hash, role, language_preference) VALUES ('aaaa2222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'user1@a.com', 'hash', 'LOCAL_USER', 'en');`);
+      await db.exec(`INSERT INTO "User" (id, tenant_id, email, role, language_preference) VALUES ('aaaa2222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'user1@a.com', 'LOCAL_USER', 'en');`);
       // Local User B1 (Local User)
-      await db.exec(`INSERT INTO "User" (id, tenant_id, email, password_hash, role, language_preference) VALUES ('bbbb1111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222', 'user1@b.com', 'hash', 'LOCAL_USER', 'en');`);
+      await db.exec(`INSERT INTO "User" (id, tenant_id, email, role, language_preference) VALUES ('bbbb1111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222', 'user1@b.com', 'LOCAL_USER', 'en');`);
 
       // Markets
       // Market A1 (Tenant A)

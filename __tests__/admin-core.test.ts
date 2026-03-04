@@ -151,7 +151,6 @@ describe('Admin Core - createCustomerUserCore', () => {
         email: validInput.email,
         tenant_id: validInput.tenant_id,
         role: 'GLOBAL_ADMIN',
-        password_hash: 'managed-by-supabase',
         language_preference: 'en',
       },
     });

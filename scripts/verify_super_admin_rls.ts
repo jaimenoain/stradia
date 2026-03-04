@@ -83,9 +83,9 @@ async function seedData(db: any) {
 
       // Seed Users for Tests
       // Global Admin (Tenant A)
-      await db.exec(`INSERT INTO "User" (id, tenant_id, email, password_hash, role, language_preference) VALUES ('aaaa1111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', 'admin@a.com', 'hash', 'GLOBAL_ADMIN', 'en');`);
+      await db.exec(`INSERT INTO "User" (id, tenant_id, email, role, language_preference) VALUES ('aaaa1111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', 'admin@a.com', 'GLOBAL_ADMIN', 'en');`);
       // Local User (Tenant A)
-      await db.exec(`INSERT INTO "User" (id, tenant_id, email, password_hash, role, language_preference) VALUES ('aaaa2222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'user@a.com', 'hash', 'LOCAL_USER', 'en');`);
+      await db.exec(`INSERT INTO "User" (id, tenant_id, email, role, language_preference) VALUES ('aaaa2222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-111111111111', 'user@a.com', 'LOCAL_USER', 'en');`);
       // UserMarket Assignment
       await db.exec(`INSERT INTO "UserMarket" (user_id, market_id) VALUES ('aaaa2222-2222-2222-2222-222222222222', '11111111-1111-1111-1111-a11111111111');`);
   } catch (e) {

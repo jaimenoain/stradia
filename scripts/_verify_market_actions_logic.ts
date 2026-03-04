@@ -36,7 +36,6 @@ async function main() {
       data: {
         tenant_id: tenantA.id,
         email: 'admin@tenantA.com',
-        password_hash: 'hash',
         role: UserRole.GLOBAL_ADMIN as any, // Cast to match DB enum if needed
         language_preference: 'en',
       },
@@ -77,7 +76,6 @@ async function main() {
       data: {
         tenant_id: tenantB.id,
         email: 'admin@tenantB.com',
-        password_hash: 'hash',
         role: UserRole.GLOBAL_ADMIN as any,
         language_preference: 'en',
       },
@@ -126,7 +124,6 @@ async function main() {
       data: {
         tenant_id: tenantA.id,
         email: 'local@tenantA.com',
-        password_hash: 'hash',
         role: UserRole.LOCAL_USER as any,
         language_preference: 'en',
       },

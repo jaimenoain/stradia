@@ -220,7 +220,6 @@ export async function createCustomerUserCore(
         email: input.email,
         tenant_id: input.tenant_id,
         role: PrismaUserRole.GLOBAL_ADMIN,
-        password_hash: 'managed-by-supabase', // Placeholder
         language_preference: 'en',
       },
     });

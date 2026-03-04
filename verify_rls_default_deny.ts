@@ -50,8 +50,8 @@ async function runOfflineVerification() {
         INSERT INTO "Tenant" (id, name, active_markets_limit, user_seat_limit, ai_token_quota, ai_tokens_used, is_active, created_at)
         VALUES ('tenant-1', 'Test Tenant', 5, 10, 1000, 0, true, NOW());
 
-        INSERT INTO "User" (id, tenant_id, email, password_hash, role, language_preference)
-        VALUES ('user-1', 'tenant-1', 'test@example.com', 'hash', 'LOCAL_USER', 'en');
+        INSERT INTO "User" (id, tenant_id, email, role, language_preference)
+        VALUES ('user-1', 'tenant-1', 'test@example.com', 'LOCAL_USER', 'en');
 
         INSERT INTO "Market" (id, tenant_id, name, region_code, timezone, is_active)
         VALUES ('market-1', 'tenant-1', 'Test Market', 'US', 'UTC', true);

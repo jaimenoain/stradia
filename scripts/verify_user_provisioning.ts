@@ -105,7 +105,6 @@ async function runTests(prisma: any, UserRole: any) {
       id: adminId,
       tenant_id: tenantId,
       email: 'admin@test.com',
-      password_hash: 'hash',
       role: UserRole.GLOBAL_ADMIN,
       language_preference: 'en'
     }

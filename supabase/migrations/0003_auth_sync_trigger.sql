@@ -7,7 +7,6 @@ begin
     email,
     tenant_id,
     role,
-    password_hash,
     language_preference,
     last_login_at
   )
@@ -16,7 +15,6 @@ begin
     new.email,
     (new.raw_app_meta_data->>'tenant_id')::text,
     (new.raw_app_meta_data->>'role')::"UserRole",
-    new.encrypted_password,
     'en',
     now()
   );
