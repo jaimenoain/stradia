@@ -149,7 +149,7 @@ describe('Provisioning Rules Verification', () => {
       // Execute & Assert
       await expect(createMarketCore(adminUser, mockPrisma, marketInput))
         .rejects
-        .toThrow('Active Market limit reached');
+        .toThrow('Active Market limit reached for this tenant');
 
       expect(mockPrisma.market.create).not.toHaveBeenCalled();
     });
@@ -157,7 +157,7 @@ describe('Provisioning Rules Verification', () => {
     it('should THROW error if user is not GLOBAL_ADMIN', async () => {
       await expect(createMarketCore(nonAdminUser, mockPrisma, marketInput))
         .rejects
-        .toThrow('Forbidden: Only Global Admins can create markets');
+        .toThrow('Forbidden: Only Super Admins and Global Admins can create markets');
 
       expect(mockPrisma.market.create).not.toHaveBeenCalled();
     });

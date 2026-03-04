@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { createClient } from '@/lib/supabase/server'
-import { createMarketCore, deleteMarketCore, getMarketsCore, marketSchema, ActionState } from './market-core'
+import { createMarketCore, updateMarketCore, deleteMarketCore, getMarketsCore, marketSchema, ActionState } from './market-core'
 
 export async function getMarkets() {
   const supabase = await createClient()
@@ -58,10 +58,13 @@ export async function createMarketAction(prevState: ActionState, formData: FormD
     return { success: false, message: 'User not found in database' }
   }
 
+  const tenantId = formData.get('tenant_id') as string | null
+
   const validatedFields = marketSchema.safeParse({
     name: formData.get('name'),
     region_code: formData.get('region_code'),
     timezone: formData.get('timezone'),
+    ...(tenantId && { tenant_id: tenantId }),
   })
 
   if (!validatedFields.success) {
@@ -80,6 +83,7 @@ export async function createMarketAction(prevState: ActionState, formData: FormD
     )
 
     revalidatePath('/settings')
+    revalidatePath('/admin/markets')
     return { success: true, message: 'Market created successfully' }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to create market';
@@ -118,7 +122,65 @@ export async function deleteMarketAction(prevState: ActionState, formData: FormD
     )
 
     revalidatePath('/settings')
+    revalidatePath('/admin/markets')
     return { success: true, message: 'Market deleted successfully' }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to update market';
+    return { success: false, message }
+  }
+}
+
+export async function updateMarketAction(prevState: ActionState, formData: FormData): Promise<ActionState> {
+  const marketId = formData.get('marketId') as string
+
+  if (!marketId) {
+    return { success: false, message: 'Market ID is required' }
+  }
+
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { success: false, message: 'Unauthorized' }
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { tenant_id: true, role: true },
+  })
+
+  if (!dbUser) {
+    return { success: false, message: 'User not found in database' }
+  }
+
+  const tenantId = formData.get('tenant_id') as string | null
+
+  const validatedFields = marketSchema.safeParse({
+    name: formData.get('name'),
+    region_code: formData.get('region_code'),
+    timezone: formData.get('timezone'),
+    ...(tenantId && { tenant_id: tenantId }),
+  })
+
+  if (!validatedFields.success) {
+    return {
+      success: false,
+      message: 'Validation failed',
+      errors: validatedFields.error.flatten().fieldErrors,
+    }
+  }
+
+  try {
+    await updateMarketCore(
+      { id: user.id, tenant_id: dbUser.tenant_id, role: dbUser.role as unknown as string },
+      prisma,
+      marketId,
+      validatedFields.data
+    )
+
+    revalidatePath('/settings')
+    revalidatePath('/admin/markets')
+    return { success: true, message: 'Market updated successfully' }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to delete market';
     return { success: false, message }
