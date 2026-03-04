@@ -13,7 +13,7 @@ begin
   values (
     new.id,
     new.email,
-    (new.raw_app_meta_data->>'tenant_id')::text,
+    (new.raw_app_meta_data->>'tenant_id')::uuid,
     (new.raw_app_meta_data->>'role')::"UserRole",
     'en',
     now()
