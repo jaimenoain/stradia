@@ -28,9 +28,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
-import { Trash2, Plus, Loader2, Globe } from 'lucide-react'
-import { createGlobalMarketAction, deleteGlobalMarketAction } from '@/app/actions/admin-actions'
-import { ActionState } from '@/app/actions/admin-core'
+import { Trash2, Plus, Loader2, Globe, Pencil } from 'lucide-react'
+import { createMarketAction, updateMarketAction, deleteMarketAction } from '@/app/actions/market-actions'
+import { ActionState } from '@/app/actions/market-core'
 
 export type GlobalMarketWithStatus = {
     id: string
@@ -63,12 +63,15 @@ const initialState: ActionState = {
 export function AdminMarketManager({ markets, tenants }: { markets: GlobalMarketWithStatus[], tenants: { id: string, name: string }[] }) {
   const { toast } = useToast()
   const [isAddOpen, setIsAddOpen] = useState(false)
+  const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+  const [marketToEdit, setMarketToEdit] = useState<GlobalMarketWithStatus | null>(null)
   const [marketToDelete, setMarketToDelete] = useState<GlobalMarketWithStatus | null>(null)
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
 
-  const [createState, createAction, isCreating] = useActionState(createGlobalMarketAction, initialState)
-  const [deleteState, deleteAction, isDeleting] = useActionState(deleteGlobalMarketAction, initialState)
+  const [createState, createAction, isCreating] = useActionState(createMarketAction, initialState)
+  const [updateState, updateAction, isUpdating] = useActionState(updateMarketAction, initialState)
+  const [deleteState, deleteAction, isDeleting] = useActionState(deleteMarketAction, initialState)
 
   useEffect(() => {
     if (createState.message) {
@@ -82,6 +85,17 @@ export function AdminMarketManager({ markets, tenants }: { markets: GlobalMarket
   }, [createState, toast])
 
   useEffect(() => {
+    if (updateState.message) {
+      if (updateState.success) {
+        toast({ title: 'Success', description: updateState.message })
+        setIsEditOpen(false)
+      } else {
+        toast({ title: 'Error', description: updateState.message, variant: 'destructive' })
+      }
+    }
+  }, [updateState, toast])
+
+  useEffect(() => {
     if (deleteState.message) {
       if (deleteState.success) {
         toast({ title: 'Success', description: deleteState.message })
@@ -93,6 +107,11 @@ export function AdminMarketManager({ markets, tenants }: { markets: GlobalMarket
       }
     }
   }, [deleteState, toast])
+
+  const openEditDialog = (market: GlobalMarketWithStatus) => {
+    setMarketToEdit(market)
+    setIsEditOpen(true)
+  }
 
   const openDeleteDialog = (market: GlobalMarketWithStatus) => {
     setMarketToDelete(market)
@@ -222,10 +241,16 @@ export function AdminMarketManager({ markets, tenants }: { markets: GlobalMarket
                   </TableCell>
                   <TableCell>
                     {!market.deleted_at && (
-                        <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(market)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                            <span className="sr-only">Delete</span>
-                        </Button>
+                        <div className="flex gap-2">
+                            <Button variant="ghost" size="icon" onClick={() => openEditDialog(market)}>
+                                <Pencil className="h-4 w-4 text-muted-foreground" />
+                                <span className="sr-only">Edit</span>
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(market)}>
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                                <span className="sr-only">Delete</span>
+                            </Button>
+                        </div>
                     )}
                   </TableCell>
                 </TableRow>
@@ -234,6 +259,63 @@ export function AdminMarketManager({ markets, tenants }: { markets: GlobalMarket
           </TableBody>
         </Table>
       </div>
+
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Global Market</DialogTitle>
+              <DialogDescription>
+                Update the details for this market.
+              </DialogDescription>
+            </DialogHeader>
+            <form action={updateAction} className="space-y-4">
+              <input type="hidden" name="marketId" value={marketToEdit?.id || ''} />
+              <div className="grid gap-2">
+                <label htmlFor="edit_tenant_id" className="text-sm font-medium">Tenant</label>
+                <Select name="tenant_id" defaultValue={marketToEdit?.tenant.id} required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select tenant" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tenants.map((tenant) => (
+                      <SelectItem key={tenant.id} value={tenant.id}>{tenant.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {updateState.errors?.tenant_id && <p className="text-red-500 text-sm">{updateState.errors.tenant_id.join(', ')}</p>}
+              </div>
+              <div className="grid gap-2">
+                <label htmlFor="edit_name" className="text-sm font-medium">Name</label>
+                <Input id="edit_name" name="name" defaultValue={marketToEdit?.name} placeholder="e.g. North America" required />
+                {updateState.errors?.name && <p className="text-red-500 text-sm">{updateState.errors.name.join(', ')}</p>}
+              </div>
+              <div className="grid gap-2">
+                <label htmlFor="edit_region_code" className="text-sm font-medium">Region Code</label>
+                <Input id="edit_region_code" name="region_code" defaultValue={marketToEdit?.region_code} placeholder="e.g. NA" required />
+                {updateState.errors?.region_code && <p className="text-red-500 text-sm">{updateState.errors.region_code.join(', ')}</p>}
+              </div>
+              <div className="grid gap-2">
+                <label htmlFor="edit_timezone" className="text-sm font-medium">Timezone</label>
+                <Select name="timezone" defaultValue={marketToEdit?.timezone} required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select timezone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {timezones.map((tz) => (
+                      <SelectItem key={tz} value={tz}>{tz}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {updateState.errors?.timezone && <p className="text-red-500 text-sm">{updateState.errors.timezone.join(', ')}</p>}
+              </div>
+              <DialogFooter>
+                <Button type="submit" disabled={isUpdating}>
+                  {isUpdating ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Updating...</> : 'Save Changes'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+      </Dialog>
 
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent>

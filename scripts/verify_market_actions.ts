@@ -29,6 +29,10 @@ async function main() {
     // 5. Change `role UserRole` to `role String`
     schema = schema.replace(/\brole\s+UserRole\b/g, 'role String');
 
+    // 6. Remove uuid specific types and functions not supported by sqlite
+    schema = schema.replace(/@db\.Uuid/g, '');
+    schema = schema.replace(/@default\(dbgenerated\("gen_random_uuid\(\)"\)\)/g, '@default(uuid())');
+
     // Write test schema
     fs.writeFileSync(TEST_SCHEMA_PATH, schema);
     console.log(`Test schema written to ${TEST_SCHEMA_PATH}`);
