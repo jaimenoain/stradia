@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import crypto from 'crypto';
-import { PrismaClient, Tenant, User, Market, UserRole as PrismaUserRole } from '@prisma/client';
+import { PrismaClient, Tenant, User, Market } from '@prisma/client';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 export type ActionState = {
@@ -183,7 +183,7 @@ export async function createCustomerUserCore(
     email: input.email,
     password,
     email_confirm: true,
-    user_metadata: {
+    app_metadata: {
       tenant_id: input.tenant_id,
       role: 'GLOBAL_ADMIN',
     },
@@ -213,16 +213,28 @@ export async function createCustomerUserCore(
   }
 
   try {
-    // 4. Create User in Prisma
-    const newUser = await db.user.create({
-      data: {
-        id: authUserId,
-        email: input.email,
-        tenant_id: input.tenant_id,
-        role: PrismaUserRole.GLOBAL_ADMIN,
-        language_preference: 'en',
-      },
-    });
+    // 4. Wait for database trigger to create the Prisma user
+    let newUser: User | null = null;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    while (attempts < maxAttempts) {
+      newUser = await db.user.findUnique({
+        where: { id: authUserId },
+      });
+
+      if (newUser) {
+        break;
+      }
+
+      // Wait 200ms before checking again
+      await new Promise(resolve => setTimeout(resolve, 200));
+      attempts++;
+    }
+
+    if (!newUser) {
+      throw new Error('Database synchronization timeout: User record was not created by the trigger within the expected time.');
+    }
 
     return { user: newUser, inviteLink };
   } catch (error) {

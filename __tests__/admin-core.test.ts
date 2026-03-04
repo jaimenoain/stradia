@@ -10,6 +10,7 @@ const mockPrisma = {
   },
   user: {
     create: vi.fn(),
+    findUnique: vi.fn(),
   },
 } as unknown as PrismaClient;
 
@@ -129,7 +130,7 @@ describe('Admin Core - createCustomerUserCore', () => {
       role: 'GLOBAL_ADMIN',
       tenant_id: validInput.tenant_id,
     };
-    (mockPrisma.user.create as Mock).mockResolvedValue(mockUser);
+    (mockPrisma.user.findUnique as Mock).mockResolvedValue(mockUser);
 
     // Execute
     const result = await createCustomerUserCore(superAdminUser, mockPrisma, mockAuthAdmin, validInput);
@@ -139,19 +140,15 @@ describe('Admin Core - createCustomerUserCore', () => {
       email: validInput.email,
       password: validInput.password,
       email_confirm: true,
-      user_metadata: {
+      app_metadata: {
         tenant_id: validInput.tenant_id,
         role: 'GLOBAL_ADMIN',
       },
     });
 
-    expect(mockPrisma.user.create).toHaveBeenCalledWith({
-      data: {
+    expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
+      where: {
         id: 'auth-user-id',
-        email: validInput.email,
-        tenant_id: validInput.tenant_id,
-        role: 'GLOBAL_ADMIN',
-        language_preference: 'en',
       },
     });
 
@@ -176,7 +173,7 @@ describe('Admin Core - createCustomerUserCore', () => {
       role: 'GLOBAL_ADMIN',
       tenant_id: validInput.tenant_id,
     };
-    (mockPrisma.user.create as Mock).mockResolvedValue(mockUser);
+    (mockPrisma.user.findUnique as Mock).mockResolvedValue(mockUser);
 
     const inputNoPassword = {
       email: validInput.email,
@@ -211,7 +208,7 @@ describe('Admin Core - createCustomerUserCore', () => {
       error: null,
     });
 
-    (mockPrisma.user.create as Mock).mockRejectedValue(new Error('DB Error'));
+    (mockPrisma.user.findUnique as Mock).mockRejectedValue(new Error('DB Error'));
 
     // Execute & Assert
     await expect(createCustomerUserCore(superAdminUser, mockPrisma, mockAuthAdmin, validInput))
