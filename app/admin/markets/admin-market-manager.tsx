@@ -28,7 +28,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
-import { Trash2, Plus, Loader2 } from 'lucide-react'
+import { Trash2, Plus, Loader2, Globe } from 'lucide-react'
 import { createGlobalMarketAction, deleteGlobalMarketAction } from '@/app/actions/admin-actions'
 import { ActionState } from '@/app/actions/admin-core'
 
@@ -184,7 +184,23 @@ export function AdminMarketManager({ markets, tenants }: { markets: GlobalMarket
           <TableBody>
             {markets.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center h-24">No markets found.</TableCell>
+                <TableCell colSpan={6} className="h-64 text-center">
+                  <div className="flex flex-col items-center justify-center space-y-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                      <Globe className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium leading-none">No markets found</p>
+                      <p className="text-sm text-muted-foreground">
+                        You haven&apos;t created any markets yet. Add one to get started.
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => setIsAddOpen(true)}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Market
+                    </Button>
+                  </div>
+                </TableCell>
               </TableRow>
             ) : (
               markets.map((market) => (

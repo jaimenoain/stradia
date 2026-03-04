@@ -76,6 +76,29 @@ export async function createMarketCore(
   });
 }
 
+export async function getMarketsCore(
+  user: MarketCoreUser,
+  db: PrismaClient
+) {
+  if (user.role !== UserRole.SUPER_ADMIN && user.role !== UserRole.GLOBAL_ADMIN) {
+    throw new Error('Forbidden: Only Super Admins and Global Admins can fetch markets');
+  }
+
+  const whereClause = user.role === UserRole.SUPER_ADMIN ? {} : { tenant_id: user.tenant_id };
+
+  return await db.market.findMany({
+    where: whereClause,
+    include: {
+      tenant: {
+        select: { id: true, name: true },
+      },
+    },
+    orderBy: {
+      name: 'asc',
+    },
+  });
+}
+
 export async function deleteMarketCore(
   user: MarketCoreUser,
   db: PrismaClient,

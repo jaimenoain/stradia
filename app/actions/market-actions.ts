@@ -3,7 +3,43 @@
 import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { createClient } from '@/lib/supabase/server'
-import { createMarketCore, deleteMarketCore, marketSchema, ActionState } from './market-core'
+import { createMarketCore, deleteMarketCore, getMarketsCore, marketSchema, ActionState } from './market-core'
+
+export async function getMarkets() {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    throw new Error('Unauthorized')
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { tenant_id: true, role: true },
+  })
+
+  if (!dbUser) {
+    throw new Error('User not found in database')
+  }
+
+  const markets = await getMarketsCore(
+    { id: user.id, tenant_id: dbUser.tenant_id, role: dbUser.role as unknown as string },
+    prisma
+  )
+
+  return markets.map(market => ({
+    id: market.id,
+    name: market.name,
+    region_code: market.region_code,
+    timezone: market.timezone,
+    is_active: market.is_active,
+    deleted_at: market.deleted_at ? market.deleted_at.toISOString() : null,
+    tenant: {
+      id: market.tenant.id,
+      name: market.tenant.name,
+    }
+  }))
+}
 
 export async function createMarketAction(prevState: ActionState, formData: FormData): Promise<ActionState> {
   const supabase = await createClient()
