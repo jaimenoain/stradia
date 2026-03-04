@@ -1,5 +1,5 @@
 export function validateDatabaseEnv() {
-  const requiredVariables = ['DATABASE_URL', 'DIRECT_URL', 'SUPABASE_SERVICE_ROLE_KEY'];
+  const requiredVariables = ['DATABASE_URL', 'DIRECT_URL'];
   const missingVariables = requiredVariables.filter(
     (variable) => !process.env[variable]
   );
