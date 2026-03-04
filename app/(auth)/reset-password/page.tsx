@@ -31,7 +31,6 @@ type ResetPasswordFormValues = z.infer<typeof ResetPasswordSchema>;
 export default function ResetPasswordPage() {
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<boolean>(false);
-  const useMocks = process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
 
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(ResetPasswordSchema),
@@ -50,21 +49,15 @@ export default function ResetPasswordPage() {
     setError("");
     setSuccess(false);
     try {
-      if (useMocks) {
-        // Simulate network delay
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        setSuccess(true);
-      } else {
-        const supabase = createClient();
-        const { error } = await supabase.auth.updateUser({
-          password: data.password
-        });
+      const supabase = createClient();
+      const { error } = await supabase.auth.updateUser({
+        password: data.password
+      });
 
-        if (error) {
-          throw error;
-        }
-        setSuccess(true);
+      if (error) {
+        throw error;
       }
+      setSuccess(true);
     } catch (err) {
       setError((err as Error).message || "Failed to reset password");
     }

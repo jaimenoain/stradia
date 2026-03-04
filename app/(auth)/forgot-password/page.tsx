@@ -27,7 +27,6 @@ type ForgotPasswordFormValues = z.infer<typeof ForgotPasswordSchema>;
 export default function ForgotPasswordPage() {
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<boolean>(false);
-  const useMocks = process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
 
   const form = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(ForgotPasswordSchema),
@@ -42,21 +41,15 @@ export default function ForgotPasswordPage() {
     setError("");
     setSuccess(false);
     try {
-      if (useMocks) {
-        // Simulate network delay
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        setSuccess(true);
-      } else {
-        const supabase = createClient();
-        const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
-          redirectTo: `${window.location.origin}/api/auth/callback?next=/reset-password`,
-        });
+      const supabase = createClient();
+      const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
+        redirectTo: `${window.location.origin}/api/auth/callback?next=/reset-password`,
+      });
 
-        if (error) {
-          throw error;
-        }
-        setSuccess(true);
+      if (error) {
+        throw error;
       }
+      setSuccess(true);
     } catch (err) {
       setError((err as Error).message || "Failed to send reset password email");
     }
@@ -86,7 +79,7 @@ export default function ForgotPasswordPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder={useMocks ? "m@example.com" : "name@example.com"}
+                  placeholder="name@example.com"
                   disabled={isSubmitting}
                   {...register("email")}
                 />

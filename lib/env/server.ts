@@ -1,6 +1,4 @@
 export function validateDatabaseEnv() {
-  const useMocks = process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
-  if (useMocks) return; // Skip validation if using mocks
 
   const requiredVariables = ['DATABASE_URL', 'DIRECT_URL'];
   const missingVariables = requiredVariables.filter(

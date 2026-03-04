@@ -30,9 +30,8 @@ type LoginFormValues = z.infer<typeof LoginSchema>;
 
 export default function LoginPage() {
   const [authError, setAuthError] = useState<string>("");
-  const { login, devLogin, isLoading } = useAuth();
+  const { login, isLoading } = useAuth();
   const router = useRouter();
-  const useMocks = process.env.NEXT_PUBLIC_USE_MOCKS === 'true';
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(LoginSchema),
@@ -75,20 +74,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleQuickLogin = async (role: UserRole) => {
-    setAuthError("");
-    try {
-      const user = await devLogin(role);
-      if (user) {
-        routeUser(user);
-      } else {
-        setAuthError("Failed to login");
-      }
-    } catch {
-      setAuthError("Failed to login");
-    }
-  };
-
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-slate-50 px-4">
       <Card className="w-full max-w-md">
@@ -105,7 +90,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder={useMocks ? "m@example.com" : "name@example.com"}
+                placeholder="name@example.com"
                 disabled={isSubmitting || isLoading}
                 {...register("email")}
               />
@@ -144,64 +129,6 @@ export default function LoginPage() {
               {(isSubmitting || isLoading) ? "Authenticating..." : "Sign In"}
             </Button>
           </form>
-
-          {useMocks && (
-            <>
-              <div className="relative mt-6">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    Or continue with (Dev Mode)
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-6 grid grid-cols-2 gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => handleQuickLogin(UserRole.SUPER_ADMIN)}
-                  disabled={isLoading || isSubmitting}
-                  className="w-full text-xs bg-amber-50 text-amber-900 border-amber-200 hover:bg-amber-100"
-                >
-                  Super Admin
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => handleQuickLogin(UserRole.GLOBAL_ADMIN)}
-                  disabled={isLoading || isSubmitting}
-                  className="w-full text-xs"
-                >
-                  Global Admin
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => handleQuickLogin(UserRole.SUPERVISOR)}
-                  disabled={isLoading || isSubmitting}
-                  className="w-full text-xs"
-                >
-                  Supervisor
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => handleQuickLogin(UserRole.LOCAL_USER)}
-                  disabled={isLoading || isSubmitting}
-                  className="w-full text-xs"
-                >
-                  Local User
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => handleQuickLogin(UserRole.READ_ONLY)}
-                  disabled={isLoading || isSubmitting}
-                  className="w-full text-xs"
-                >
-                  Read Only
-                </Button>
-              </div>
-            </>
-          )}
         </CardContent>
         <CardFooter className="flex justify-center text-sm text-muted-foreground">
            <p>Don&apos;t have an account? Contact admin.</p>
