@@ -192,11 +192,11 @@ export async function getGlobalUsers() {
     id: u.id,
     email: u.email,
     role: u.role,
-    tenant: {
+    tenant: u.tenant ? {
       id: u.tenant.id,
       name: u.tenant.name,
       is_active: u.tenant.is_active,
-    },
+    } : null,
   }));
 }
 
