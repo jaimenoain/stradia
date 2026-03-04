@@ -42,7 +42,6 @@ model User {
   id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   tenant_id           String    @db.Uuid
   email               String    @unique
-  password_hash       String
   role                UserRole
   language_preference String
   last_login_at       DateTime?

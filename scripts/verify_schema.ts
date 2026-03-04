@@ -72,7 +72,6 @@ if (checkModel('User')) {
   checkField('User', 'id', 'String');
   checkField('User', 'tenant_id', 'String');
   checkField('User', 'email', 'String');
-  checkField('User', 'password_hash', 'String');
   checkField('User', 'role', 'UserRole');
   checkField('User', 'language_preference', 'String');
   checkField('User', 'last_login_at', 'DateTime?');

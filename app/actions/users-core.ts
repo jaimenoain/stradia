@@ -32,7 +32,6 @@ export async function provisionUserCore(
       data: {
         tenant_id: tenantId,
         email: dto.email,
-        password_hash: 'pending', // Simulate Supabase Auth placeholder
         role: dto.role as UserRole,
         language_preference: 'en', // Default
       },
