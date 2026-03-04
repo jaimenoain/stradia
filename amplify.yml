@@ -3,7 +3,7 @@ frontend:
   phases:
     preBuild:
       commands:
-        - env | grep -e DATABASE_URL -e DIRECT_URL >> .env.production
+        - env | grep -e DATABASE_URL -e DIRECT_URL -e NEXT_PUBLIC_SUPABASE_URL -e SUPABASE_SERVICE_ROLE_KEY >> .env.production
         - PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm ci
         - npx prisma generate
     build:
