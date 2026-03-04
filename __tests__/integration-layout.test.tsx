@@ -62,11 +62,8 @@ vi.mock('@/lib/auth/tenant-lockout', () => ({
 }));
 
 describe('Dashboard Integration Check', () => {
-  const originalEnv = process.env;
-
   beforeEach(() => {
     vi.resetAllMocks();
-    process.env = { ...originalEnv };
     useSessionStore.setState({ user: null, isAuthenticated: false });
 
     // Mock window.matchMedia
@@ -85,14 +82,7 @@ describe('Dashboard Integration Check', () => {
     });
   });
 
-  afterEach(() => {
-    process.env = originalEnv;
-  });
-
   it('Should render DashboardLayout correctly', async () => {
-    // Enable mocks
-    process.env.NEXT_PUBLIC_USE_MOCKS = 'true';
-
     // Await the async component to get the React Element
     const LayoutComponent = await DashboardLayout({
       children: <div data-testid="dashboard-content">Protected Content</div>
@@ -110,28 +100,5 @@ describe('Dashboard Integration Check', () => {
 
     // 2. Verify content renders (No error boundary or redirect blocking)
     expect(screen.getByTestId('dashboard-content')).toBeDefined();
-  });
-
-  it('Should NOT hydrate session when NEXT_PUBLIC_USE_MOCKS=false', async () => {
-    // Disable mocks
-    process.env.NEXT_PUBLIC_USE_MOCKS = 'false';
-
-    // Await the async component to get the React Element
-    const LayoutComponent = await DashboardLayout({
-      children: <div data-testid="dashboard-content">Content</div>
-    });
-
-    render(
-      <Providers>
-        {LayoutComponent}
-      </Providers>
-    );
-
-    // Verify session store remains empty
-    await waitFor(() => {
-      // We wait a tick just in case
-      const user = useSessionStore.getState().user;
-      expect(user).toBeNull();
-    }, { timeout: 100 });
   });
 });

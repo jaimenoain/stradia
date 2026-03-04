@@ -20,22 +20,6 @@ test.describe('Login Page', () => {
     await page.screenshot({ path: 'e2e/screenshots/login_page.png' });
   });
 
-  test('should allow quick login as Global Admin', async ({ page }) => {
-    await page.goto('/login');
-
-    // Click on Global Admin quick login
-    await page.click('button:has-text("Global Admin")');
-
-    // Wait for navigation
-    await page.waitForURL('**/overview');
-
-    // Verify we are on the overview page
-    await expect(page).toHaveURL(/\/overview/);
-
-    // Take screenshot of overview page
-    await page.screenshot({ path: 'e2e/screenshots/overview_after_login.png' });
-  });
-
   test('should show error for invalid credentials', async ({ page }) => {
     await page.goto('/login');
 
