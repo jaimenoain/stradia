@@ -3,10 +3,11 @@ frontend:
   phases:
     preBuild:
       commands:
-        - npm ci
+        - env | grep -e DATABASE_URL -e DIRECT_URL >> .env.production
+        - PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm ci
+        - npx prisma generate
     build:
       commands:
-        - env | grep -e DATABASE_URL -e DIRECT_URL >> .env.production
         - npm run build
   artifacts:
     baseDirectory: .next
@@ -15,3 +16,4 @@ frontend:
   cache:
     paths:
       - node_modules/**/*
+      - .next/cache/**/*
