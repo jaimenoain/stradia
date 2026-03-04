@@ -76,10 +76,10 @@ export function UsersTable({ users, action }: UsersTableProps) {
                 <TableCell>
                   <Badge variant="outline">{user.role}</Badge>
                 </TableCell>
-                <TableCell>{user.tenant ? user.tenant.name : '-'}</TableCell>
+                <TableCell>{user.tenant?.name || 'System'}</TableCell>
                 <TableCell>
                   {!user.tenant ? (
-                    <Badge variant="secondary">No Tenant</Badge>
+                    <Badge variant="secondary">System</Badge>
                   ) : user.tenant.is_active ? (
                     <Badge variant="default" className="bg-emerald-600 hover:bg-emerald-700">
                       Active

@@ -7,26 +7,21 @@
    - Network:      http://192.168.0.2:3000
 
  ✓ Starting...
- ✓ Ready in 2.2s
- ○ Compiling /login ...
- ✓ Compiled /login in 8.2s (1139 modules)
- GET /login 200 in 9643ms
- ○ Compiling /middleware ...
- ✓ Compiled /middleware in 839ms (165 modules)
- GET /login 200 in 46ms
-<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (133kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
- ✓ Compiled in 418ms (518 modules)
- ✓ Compiled in 339ms (518 modules)
- GET /login 200 in 186ms
- GET /login 200 in 39ms
- ✓ Compiled in 300ms (518 modules)
- ✓ Compiled in 532ms (518 modules)
- GET /login 200 in 138ms
- ✓ Compiled in 242ms (518 modules)
- GET /login 200 in 62ms
- GET /login 200 in 39ms
- ✓ Compiled in 257ms (518 modules)
- ✓ Compiled in 238ms (518 modules)
- GET /login 200 in 158ms
- GET /login 200 in 41ms
- ✓ Compiled in 244ms (518 modules)
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+ ✓ Ready in 2.3s
+ ○ Compiling /test-components/users-table ...
+ ✓ Compiled /test-components/users-table in 11.8s (1018 modules)
+ GET /test-components/users-table 200 in 14001ms
+ GET /test-components/users-table 200 in 207ms
+ GET /test-components/users-table 200 in 174ms
+ GET /test-components/users-table 200 in 174ms
+   Reload env: .env.local
+ ✓ Compiled in 5.6s (1018 modules)
+   Reload env: .env.local
+ ✓ Compiled in 363ms (995 modules)
+ GET /test-components/users-table 200 in 599ms
+ ✓ Compiled in 613ms (319 modules)
