@@ -33,20 +33,15 @@ vi.mock('next/navigation', () => ({
 }));
 
 describe('LoginPage and AuthProvider Integration', () => {
-  const originalEnv = process.env;
-
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env = { ...originalEnv };
   });
 
   afterEach(() => {
-    process.env = originalEnv;
     cleanup();
   });
 
-  it('uses Supabase auth when mocks are disabled', async () => {
-    process.env.NEXT_PUBLIC_USE_MOCKS = 'false';
+  it('uses Supabase auth for login', async () => {
     mockSignInWithPassword.mockResolvedValue({ data: { user: { id: 'test-id' } }, error: null });
 
     render(
@@ -54,10 +49,6 @@ describe('LoginPage and AuthProvider Integration', () => {
         <LoginPage />
       </AuthProvider>
     );
-
-    // Verify "Dev Mode" buttons are NOT present
-    const devButtons = screen.queryByText(/Global Admin/i);
-    expect(devButtons).toBeNull();
 
     // Interact with form
     const emailInput = screen.getByLabelText(/email/i);
@@ -72,38 +63,6 @@ describe('LoginPage and AuthProvider Integration', () => {
         email: 'real@example.com',
         password: 'password123',
       });
-    });
-  });
-
-  it('uses Mock auth when mocks are enabled', async () => {
-    process.env.NEXT_PUBLIC_USE_MOCKS = 'true';
-
-    render(
-      <AuthProvider>
-        <LoginPage />
-      </AuthProvider>
-    );
-
-    // Verify "Dev Mode" buttons are present
-    expect(screen.getByText(/Global Admin/i)).toBeDefined();
-
-    // Verify Supabase is NOT called
-    // Note: The current mock login uses getMockUserByEmail logic, so we use a valid mock email.
-    // However, if we enter an invalid mock email, it won't call login.
-    // If we use 'admin@example.com' (assuming it exists in mock data), it calls login() from provider.
-    // We want to ensure Supabase signInWithPassword is NOT called.
-
-    const emailInput = screen.getByLabelText(/email/i);
-    const passwordInput = screen.getByLabelText(/password/i);
-
-    fireEvent.change(emailInput, { target: { value: 'admin@example.com' } });
-    fireEvent.change(passwordInput, { target: { value: 'password' } });
-    fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
-
-    await waitFor(() => {
-      expect(mockSignInWithPassword).not.toHaveBeenCalled();
-      // It should call router.push if login succeeds (or fail if mock user not found)
-      // We don't strictly need to check router.push here if we just want to ensure Supabase isn't called.
     });
   });
 });

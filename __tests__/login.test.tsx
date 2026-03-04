@@ -41,7 +41,6 @@ vi.mock('@/lib/supabase/client', () => ({
 describe('LoginPage Verification', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.NEXT_PUBLIC_USE_MOCKS = 'true';
 
     // Default mock implementation for useAuth
     (AuthProviderModule.useAuth as Mock).mockReturnValue({

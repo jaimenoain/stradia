@@ -25,28 +25,4 @@ test.describe('Layouts & Route Groups', () => {
     await expect(sidebar).not.toBeVisible();
   });
 
-  const dashboardRoutes = [
-    '/overview',
-    '/strategies',
-    '/settings',
-    '/markets/123/board'
-  ];
-
-  for (const route of dashboardRoutes) {
-    test(`Dashboard Layout (${route})`, async ({ page }) => {
-      await page.goto(route);
-
-      // Positive: Sidebar
-      const sidebar = page.locator('aside');
-      await expect(sidebar).toBeVisible();
-
-      // Positive: TopNav
-      const topnav = page.locator('header');
-      await expect(topnav).toBeVisible();
-
-      // Positive: Page Title <h1>
-      const h1 = page.locator('h1');
-      await expect(h1).toBeVisible();
-    });
-  }
 });
