@@ -18,7 +18,7 @@ export default function Loading() {
         <div className="h-10 w-32 animate-pulse rounded-md bg-muted" />
       </div>
 
-      <div className="rounded-md border bg-white shadow-sm">
+      <div className="rounded-md border bg-background shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>

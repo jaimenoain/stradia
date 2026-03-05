@@ -26,13 +26,13 @@ export default async function CustomersPage() {
 
   if (tenants.length === 0) {
     return (
-      <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed bg-white">
+      <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed bg-background">
         <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-100">
-             <Building2 className="h-10 w-10 text-slate-400" />
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+             <Building2 className="h-10 w-10 text-muted-foreground" />
           </div>
           <h3 className="mt-4 text-lg font-semibold">No customers added</h3>
-          <p className="mb-4 mt-2 text-sm text-slate-500">
+          <p className="mb-4 mt-2 text-sm text-muted-foreground">
             You haven&apos;t added any customers to the platform yet.
           </p>
           <CreateCustomerSheet>
@@ -64,7 +64,7 @@ export default async function CustomersPage() {
           </CreateCustomerSheet>
         </div>
       </div>
-      <div className="rounded-md border bg-white">
+      <div className="rounded-md border bg-background">
         <Table>
           <TableHeader>
             <TableRow>
@@ -86,8 +86,8 @@ export default async function CustomersPage() {
                 <TableCell>
                   <div className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${
                     tenant.is_active
-                      ? "border-transparent bg-green-100 text-green-800 hover:bg-green-200"
-                      : "border-transparent bg-slate-100 text-slate-800 hover:bg-slate-200"
+                      ? "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                      : "border-transparent bg-muted text-muted-foreground hover:bg-muted/80"
                   }`}>
                     {tenant.is_active ? 'Active' : 'Inactive'}
                   </div>
