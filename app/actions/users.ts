@@ -72,5 +72,5 @@ export async function getTenantUsers() {
   }
 
   // Call core logic
-  return await getTenantUsersCore(prisma, currentUser.tenant_id, currentUser.role);
+  return await getTenantUsersCore(prisma, currentUser.tenant_id ?? '', currentUser.role);
 }

@@ -40,13 +40,13 @@ model Tenant {
 
 model User {
   id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenant_id           String    @db.Uuid
+  tenant_id           String?   @db.Uuid
   email               String    @unique
   role                UserRole
   language_preference String
   last_login_at       DateTime?
 
-  tenant  Tenant       @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
+  tenant  Tenant?      @relation(fields: [tenant_id], references: [id], onDelete: Cascade)
   markets UserMarket[]
 }
 

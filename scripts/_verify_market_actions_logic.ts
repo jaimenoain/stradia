@@ -45,7 +45,7 @@ async function main() {
     log('Test 1: Create Market (Success)...');
     try {
       await createMarketCore(
-        { id: userA.id, tenant_id: userA.tenant_id, role: userA.role },
+        { id: userA.id, tenant_id: userA.tenant_id ?? '', role: userA.role },
         prisma,
         { name: 'Market A1', region_code: 'US', timezone: 'UTC' }
       );
@@ -84,7 +84,7 @@ async function main() {
     log('Test 2: Isolation (Create Market for Tenant B)...');
     try {
       await createMarketCore(
-        { id: userB.id, tenant_id: userB.tenant_id, role: userB.role },
+        { id: userB.id, tenant_id: userB.tenant_id ?? '', role: userB.role },
         prisma,
         { name: 'Market B1', region_code: 'EU', timezone: 'CET' }
       );
@@ -104,7 +104,7 @@ async function main() {
     log('Test 3: Deletion...');
     try {
       await deleteMarketCore(
-        { id: userA.id, tenant_id: userA.tenant_id, role: userA.role },
+        { id: userA.id, tenant_id: userA.tenant_id ?? '', role: userA.role },
         prisma,
         market1!.id
       );
@@ -131,7 +131,7 @@ async function main() {
 
     try {
       await createMarketCore(
-        { id: userLocal.id, tenant_id: userLocal.tenant_id, role: userLocal.role },
+        { id: userLocal.id, tenant_id: userLocal.tenant_id ?? '', role: userLocal.role },
         prisma,
         { name: 'Market A2', region_code: 'US', timezone: 'UTC' }
       );

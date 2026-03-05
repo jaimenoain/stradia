@@ -26,7 +26,7 @@ export default async function SettingsPage() {
   }
 
   const markets = await prisma.market.findMany({
-    where: dbUser.role === UserRole.SUPER_ADMIN ? undefined : { tenant_id: dbUser.tenant_id },
+    where: dbUser.role === UserRole.SUPER_ADMIN ? undefined : { tenant_id: dbUser.tenant_id ?? '' },
     orderBy: { name: 'asc' },
   })
 

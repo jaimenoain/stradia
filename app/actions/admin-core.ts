@@ -194,7 +194,8 @@ export async function createCustomerUserCore(
   });
 
   if (authError || !authData.user) {
-    throw new Error(`Failed to create user in Supabase: ${authError?.message}`);
+    console.error('[createCustomerUserCore] Supabase error:', authError);
+    throw new Error(`Failed to create user in Supabase: ${authError?.message || 'Unknown error'}`);
   }
 
   const authUserId = authData.user.id;

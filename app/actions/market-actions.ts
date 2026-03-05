@@ -23,7 +23,7 @@ export async function getMarkets() {
   }
 
   const markets = await getMarketsCore(
-    { id: user.id, tenant_id: dbUser.tenant_id, role: dbUser.role as unknown as string },
+    { id: user.id, tenant_id: dbUser.tenant_id ?? '', role: dbUser.role as unknown as string },
     prisma
   )
 
@@ -77,7 +77,7 @@ export async function createMarketAction(prevState: ActionState, formData: FormD
 
   try {
     await createMarketCore(
-      { id: user.id, tenant_id: dbUser.tenant_id, role: dbUser.role as unknown as string },
+      { id: user.id, tenant_id: dbUser.tenant_id ?? '', role: dbUser.role as unknown as string },
       prisma,
       validatedFields.data
     )
@@ -116,7 +116,7 @@ export async function deleteMarketAction(prevState: ActionState, formData: FormD
 
   try {
     await deleteMarketCore(
-      { id: user.id, tenant_id: dbUser.tenant_id, role: dbUser.role as unknown as string },
+      { id: user.id, tenant_id: dbUser.tenant_id ?? '', role: dbUser.role as unknown as string },
       prisma,
       marketId
     )
@@ -172,7 +172,7 @@ export async function updateMarketAction(prevState: ActionState, formData: FormD
 
   try {
     await updateMarketCore(
-      { id: user.id, tenant_id: dbUser.tenant_id, role: dbUser.role as unknown as string },
+      { id: user.id, tenant_id: dbUser.tenant_id ?? '', role: dbUser.role as unknown as string },
       prisma,
       marketId,
       validatedFields.data
