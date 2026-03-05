@@ -152,17 +152,17 @@ export function AdminMarketManager({ markets, tenants }: { markets: GlobalMarket
                     ))}
                   </SelectContent>
                 </Select>
-                {createState.errors?.tenant_id && <p className="text-red-500 text-sm">{createState.errors.tenant_id.join(', ')}</p>}
+                {createState.errors?.tenant_id && <p className="text-destructive text-sm">{createState.errors.tenant_id.join(', ')}</p>}
               </div>
               <div className="grid gap-2">
                 <label htmlFor="name" className="text-sm font-medium">Name</label>
                 <Input id="name" name="name" placeholder="e.g. North America" required />
-                {createState.errors?.name && <p className="text-red-500 text-sm">{createState.errors.name.join(', ')}</p>}
+                {createState.errors?.name && <p className="text-destructive text-sm">{createState.errors.name.join(', ')}</p>}
               </div>
               <div className="grid gap-2">
                 <label htmlFor="region_code" className="text-sm font-medium">Region Code</label>
                 <Input id="region_code" name="region_code" placeholder="e.g. NA" required />
-                {createState.errors?.region_code && <p className="text-red-500 text-sm">{createState.errors.region_code.join(', ')}</p>}
+                {createState.errors?.region_code && <p className="text-destructive text-sm">{createState.errors.region_code.join(', ')}</p>}
               </div>
               <div className="grid gap-2">
                 <label htmlFor="timezone" className="text-sm font-medium">Timezone</label>
@@ -176,7 +176,7 @@ export function AdminMarketManager({ markets, tenants }: { markets: GlobalMarket
                     ))}
                   </SelectContent>
                 </Select>
-                {createState.errors?.timezone && <p className="text-red-500 text-sm">{createState.errors.timezone.join(', ')}</p>}
+                {createState.errors?.timezone && <p className="text-destructive text-sm">{createState.errors.timezone.join(', ')}</p>}
               </div>
               <DialogFooter>
                 <Button type="submit" disabled={isCreating}>
@@ -188,7 +188,7 @@ export function AdminMarketManager({ markets, tenants }: { markets: GlobalMarket
         </Dialog>
       </div>
 
-      <div className="rounded-md border bg-white">
+      <div className="rounded-md border bg-background">
         <Table>
           <TableHeader>
             <TableRow>
@@ -230,11 +230,11 @@ export function AdminMarketManager({ markets, tenants }: { markets: GlobalMarket
                   <TableCell>{market.timezone}</TableCell>
                   <TableCell>
                     {market.deleted_at ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-destructive/10 text-destructive">
                             Deleted
                         </span>
                     ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
                             Active
                         </span>
                     )}
@@ -282,17 +282,17 @@ export function AdminMarketManager({ markets, tenants }: { markets: GlobalMarket
                     ))}
                   </SelectContent>
                 </Select>
-                {updateState.errors?.tenant_id && <p className="text-red-500 text-sm">{updateState.errors.tenant_id.join(', ')}</p>}
+                {updateState.errors?.tenant_id && <p className="text-destructive text-sm">{updateState.errors.tenant_id.join(', ')}</p>}
               </div>
               <div className="grid gap-2">
                 <label htmlFor="edit_name" className="text-sm font-medium">Name</label>
                 <Input id="edit_name" name="name" defaultValue={marketToEdit?.name} placeholder="e.g. North America" required />
-                {updateState.errors?.name && <p className="text-red-500 text-sm">{updateState.errors.name.join(', ')}</p>}
+                {updateState.errors?.name && <p className="text-destructive text-sm">{updateState.errors.name.join(', ')}</p>}
               </div>
               <div className="grid gap-2">
                 <label htmlFor="edit_region_code" className="text-sm font-medium">Region Code</label>
                 <Input id="edit_region_code" name="region_code" defaultValue={marketToEdit?.region_code} placeholder="e.g. NA" required />
-                {updateState.errors?.region_code && <p className="text-red-500 text-sm">{updateState.errors.region_code.join(', ')}</p>}
+                {updateState.errors?.region_code && <p className="text-destructive text-sm">{updateState.errors.region_code.join(', ')}</p>}
               </div>
               <div className="grid gap-2">
                 <label htmlFor="edit_timezone" className="text-sm font-medium">Timezone</label>
@@ -306,7 +306,7 @@ export function AdminMarketManager({ markets, tenants }: { markets: GlobalMarket
                     ))}
                   </SelectContent>
                 </Select>
-                {updateState.errors?.timezone && <p className="text-red-500 text-sm">{updateState.errors.timezone.join(', ')}</p>}
+                {updateState.errors?.timezone && <p className="text-destructive text-sm">{updateState.errors.timezone.join(', ')}</p>}
               </div>
               <DialogFooter>
                 <Button type="submit" disabled={isUpdating}>

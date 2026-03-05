@@ -62,8 +62,8 @@ export default async function AdminLayout({
 
        {/* Main Content */}
        <div className="flex flex-col flex-1">
-          <header className="flex h-16 items-center gap-4 border-b bg-white px-6">
-             <div className="flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium border border-amber-200">
+          <header className="flex h-16 items-center gap-4 border-b bg-background px-6">
+             <div className="flex items-center gap-2 px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-xs font-medium border border-border">
                 <ShieldCheck className="h-3 w-3" />
                 Platform Admin
              </div>

@@ -4,25 +4,25 @@ export default function AdminLayoutLoading() {
   return (
     <div className="flex min-h-screen">
       {/* Sidebar Skeleton */}
-      <aside className="w-64 border-r bg-slate-900 text-white hidden md:block">
-        <div className="flex h-16 items-center px-6 border-b border-slate-800">
+      <aside className="w-64 border-r bg-muted/40 hidden md:block">
+        <div className="flex h-16 items-center px-6 border-b">
           <span className="text-lg font-bold">Stradia Admin</span>
         </div>
         <nav className="flex flex-col gap-2 p-4 opacity-50 pointer-events-none">
-          <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-300">
+          <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground">
             <Users className="h-4 w-4" />
             Customers
           </div>
-          <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-300">
+          <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground">
             <UserCog className="h-4 w-4" />
             Global Users
           </div>
-          <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-300">
+          <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground">
             <LineChart className="h-4 w-4" />
             Markets
           </div>
-          <div className="my-2 border-t border-slate-800" />
-          <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-300">
+          <div className="my-2 border-t" />
+          <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground">
             <LayoutDashboard className="h-4 w-4" />
             Back to App
           </div>
@@ -32,8 +32,8 @@ export default function AdminLayoutLoading() {
       {/* Main Content Skeleton */}
       <div className="flex flex-col flex-1">
         {/* TopNav Skeleton */}
-        <header className="flex h-16 items-center gap-4 border-b bg-white px-6 shadow-sm">
-          <div className="flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium border border-amber-200">
+        <header className="flex h-16 items-center gap-4 border-b bg-background px-6 shadow-sm">
+          <div className="flex items-center gap-2 px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-xs font-medium border border-border">
             <ShieldCheck className="h-3 w-3" />
             Platform Admin
           </div>
@@ -46,7 +46,7 @@ export default function AdminLayoutLoading() {
         </header>
 
         {/* Page Content Skeleton */}
-        <main className="flex flex-1 flex-col p-4 lg:p-6 bg-slate-50/50">
+        <main className="flex flex-1 flex-col p-4 lg:p-6">
           <div className="flex flex-col gap-8">
             <div className="flex items-center justify-between space-y-2">
               <div>
@@ -55,7 +55,7 @@ export default function AdminLayoutLoading() {
               </div>
               <div className="h-10 w-32 animate-pulse rounded-md bg-muted" />
             </div>
-            <div className="rounded-md border bg-white h-64 animate-pulse bg-muted/20" />
+            <div className="rounded-md border bg-background h-64 animate-pulse opacity-50" />
           </div>
         </main>
       </div>

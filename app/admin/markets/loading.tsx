@@ -22,7 +22,7 @@ export default function Loading() {
           <Skeleton className="h-10 w-36" />
         </div>
 
-        <div className="rounded-md border bg-white">
+        <div className="rounded-md border bg-background">
           <Table>
             <TableHeader>
               <TableRow>

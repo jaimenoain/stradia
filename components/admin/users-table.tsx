@@ -30,13 +30,13 @@ interface UsersTableProps {
 export function UsersTable({ users, action }: UsersTableProps) {
   if (users.length === 0) {
     return (
-      <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed bg-white">
+      <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed bg-background">
         <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-100">
-             <Users className="h-10 w-10 text-slate-400" />
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+             <Users className="h-10 w-10 text-muted-foreground" />
           </div>
           <h3 className="mt-4 text-lg font-semibold">No global users added</h3>
-          <p className="mb-4 mt-2 text-sm text-slate-500">
+          <p className="mb-4 mt-2 text-sm text-muted-foreground">
             You haven&apos;t added any users to the platform yet.
           </p>
           {action}
@@ -59,7 +59,7 @@ export function UsersTable({ users, action }: UsersTableProps) {
         </div>
       </div>
 
-      <div className="rounded-md border bg-white shadow-sm">
+      <div className="rounded-md border bg-background shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>
@@ -81,7 +81,7 @@ export function UsersTable({ users, action }: UsersTableProps) {
                   {!user.tenant ? (
                     <Badge variant="secondary">System</Badge>
                   ) : user.tenant.is_active ? (
-                    <Badge variant="default" className="bg-emerald-600 hover:bg-emerald-700">
+                    <Badge variant="secondary">
                       Active
                     </Badge>
                   ) : (
