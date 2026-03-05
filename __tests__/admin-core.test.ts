@@ -140,6 +140,10 @@ describe('Admin Core - createCustomerUserCore', () => {
       email: validInput.email,
       password: validInput.password,
       email_confirm: true,
+      user_metadata: {
+        tenant_id: validInput.tenant_id,
+        role: 'GLOBAL_ADMIN',
+      },
       app_metadata: {
         tenant_id: validInput.tenant_id,
         role: 'GLOBAL_ADMIN',

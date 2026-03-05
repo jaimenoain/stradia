@@ -183,6 +183,10 @@ export async function createCustomerUserCore(
     email: input.email,
     password,
     email_confirm: true,
+    user_metadata: {
+      tenant_id: input.tenant_id,
+      role: 'GLOBAL_ADMIN',
+    },
     app_metadata: {
       tenant_id: input.tenant_id,
       role: 'GLOBAL_ADMIN',
