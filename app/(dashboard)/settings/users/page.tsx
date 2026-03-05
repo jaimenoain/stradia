@@ -43,7 +43,7 @@ export default async function UserDirectoryPage() {
     where: currentUser.role === UserRole.SUPER_ADMIN
       ? { deleted_at: null }
       : {
-          tenant_id: currentUser.tenant_id,
+          tenant_id: currentUser.tenant_id ?? '',
           deleted_at: null // Only fetch active markets
         },
     orderBy: { name: 'asc' },

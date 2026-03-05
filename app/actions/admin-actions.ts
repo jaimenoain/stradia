@@ -160,6 +160,7 @@ export async function createCustomerUser(
       inviteLink,
     };
   } catch (error) {
+    console.error('[createCustomerUser Action] Error:', error);
     const message =
       error instanceof Error ? error.message : 'Failed to create customer user';
     return { success: false, message };
