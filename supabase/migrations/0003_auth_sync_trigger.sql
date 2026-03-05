@@ -14,7 +14,7 @@ begin
     new.id,
     new.email,
     (new.raw_app_meta_data->>'tenant_id')::uuid,
-    (new.raw_app_meta_data->>'role')::"UserRole",
+    (new.raw_app_meta_data->>'role')::public."UserRole",
     'en',
     now()
   );
